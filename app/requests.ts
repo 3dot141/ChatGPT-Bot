@@ -1,11 +1,13 @@
-import type {ChatRequest, ChatReponse} from "./api/chat/typing";
-import {SessionMsg, filterConfig, Message, ModelConfig, useAccessStore} from "./store";
-import Locale from "./locales";
-import GPT3Tokenizer from "gpt3-tokenizer";
-import {supabaseClient} from "@/app/lib/embeddings-supabase";
 import type { ChatRequest, ChatResponse } from "./api/openai/typing";
-import { Message, ModelConfig, useAccessStore, useChatStore } from "./store";
+import {
+  Message,
+  ModelConfig,
+  SessionMsg,
+  useAccessStore,
+  useChatStore,
+} from "./store";
 import { showToast } from "./components/ui-lib";
+import { json } from "stream/consumers";
 
 const TIME_OUT_MS = 30000;
 
@@ -125,31 +127,43 @@ export async function requestUsage() {
   };
 }
 
-
 export async function requestChatStreamV2(
-
   sessionMsg: SessionMsg,
   options?: {
     filterBot?: boolean;
     modelConfig?: ModelConfig;
     onMessage: (message: string, done: boolean) => void;
-    onError: (error: Error) => void;
+    onError: (error: Error, statusCode?: number) => void;
     onController?: (controller: AbortController) => void;
-  }
+  },
 ) {
+  // const res = await fetch("/api/chat-message", {
+  //   method: "POST",
+  //   headers: {
+  //     "Content-Type": "application/json",
+  //     ...getHeaders(),
+  //   },
+  //   body: JSON.stringify(sessionMsg),
+  // });
+  // const resBody = (await res.json()) as SessionMsg;
+  const messages = [sessionMsg.userMessage, ...sessionMsg.recentMessages];
 
-  const res = await fetch("/api/chat-message", {
+  await requestChatStream(messages, options);
+}
+
+export async function requestAnalysis(
+  userMessage: Message,
+  botMessage: Message,
+) {
+  // 只发送，不反馈
+  fetch("/api/analysis", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       ...getHeaders(),
     },
-    body: JSON.stringify(sessionMsg),
+    body: JSON.stringify({ userMessage, botMessage }),
   });
-  const resBody = (await res.json()) as SessionMsg;
-  const messages = [...resBody.recentMessages, resBody.userMessage];
-
-  await requestChatStream(messages, options)
 }
 
 export async function requestChatStream(

@@ -1,10 +1,12 @@
-import {create} from "zustand";
-import {persist} from "zustand/middleware";
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
-import {type ChatCompletionResponseMessage} from "openai";
+import { type ChatCompletionResponseMessage } from "openai";
 import {
   ControllerPool,
-  requestChatStream, requestChatStreamV2,
+  requestAnalysis,
+  requestChatStream,
+  requestChatStreamV2,
   requestWithPrompt,
 } from "../requests";
 import { isMobileScreen, trimTopic } from "../utils";
@@ -32,7 +34,7 @@ export function createMessage(override: Partial<Message>): Message {
 export type SessionMsg = {
   userMessage: Message;
   recentMessages: Message[];
-}
+};
 
 export enum SubmitKey {
   Enter = "Enter",
@@ -141,7 +143,7 @@ const DEFAULT_CONFIG: ChatConfig = {
   historyMessageCount: 4,
   compressMessageLengthThreshold: 1000,
   sendBotMessages: true as boolean,
-  submitKey: SubmitKey.CtrlEnter as SubmitKey,
+  submitKey: SubmitKey.Enter as SubmitKey,
   avatar: "1f603",
   fontSize: 14,
   theme: Theme.Auto as Theme,
@@ -405,11 +407,7 @@ export const useChatStore = create<ChatStore>()(
           session.messages.push(botMessage);
         });
 
-
-        requestChatStreamV2({
-          userMessage,
-          recentMessages
-        }, {
+        requestChatStream(sendMessages, {
           onMessage(content, done) {
             // stream response
             if (done) {
@@ -420,6 +418,7 @@ export const useChatStore = create<ChatStore>()(
                 sessionIndex,
                 botMessage.id ?? messageIndex,
               );
+              requestAnalysis(userMessage, botMessage);
             } else {
               botMessage.content = content;
               set(() => ({}));
@@ -436,6 +435,7 @@ export const useChatStore = create<ChatStore>()(
             botMessage.isError = true;
             set(() => ({}));
             ControllerPool.remove(sessionIndex, botMessage.id ?? messageIndex);
+            requestAnalysis(userMessage, botMessage);
           },
           onController(controller) {
             // collect controller for stop/retry

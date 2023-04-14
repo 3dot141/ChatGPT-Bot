@@ -1,12 +1,13 @@
 import { createParser } from "eventsource-parser";
 import { NextRequest } from "next/server";
-import { requestOpenai } from "../common";
+import { doRequestOpenai } from "../common";
+import { preHandleMessage } from "@/app/api/chat-message";
+import { CreateChatCompletionRequest } from "openai/api";
+import { Request } from "node-fetch";
 
-async function createStream(req: NextRequest) {
+async function createStream(res: Response) {
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
-
-  const res = await requestOpenai(req);
 
   const contentType = res.headers.get("Content-Type") ?? "";
   if (!contentType.includes("stream")) {
@@ -49,13 +50,46 @@ async function createStream(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const stream = await createStream(req);
+    const apiKey = req.headers.get("token");
+
+    const bodyStream = req.body;
+    if (bodyStream == null) {
+      throw new Error("request body is empty, please check it");
+    }
+
+    const chunks = [];
+    // @ts-ignore
+    for await (const chunk of bodyStream) {
+      chunks.push(chunk);
+    }
+
+    const body = JSON.parse(Buffer.concat(chunks).toString());
+
+    const completionReq = (await body) as CreateChatCompletionRequest;
+
+    const chatCompletionRequest = await preHandleMessage(apiKey, completionReq);
+    const res = await doRequestOpenai({
+      headers: req.headers,
+      method: req.method,
+      body: JSON.stringify(chatCompletionRequest),
+    });
+
+    const stream = await createStream(res);
     return new Response(stream);
   } catch (error) {
     console.error("[Chat Stream]", error);
-    return new Response(
-      ["```json\n", JSON.stringify(error, null, "  "), "\n```"].join(""),
-    );
+    let errorMsg: string;
+    if (error instanceof Error) {
+      const serializedError = {
+        message: error.message,
+        name: error.name,
+        stack: error.stack,
+      };
+      errorMsg = JSON.stringify(serializedError, null, 2);
+    } else {
+      errorMsg = String(error);
+    }
+    return new Response(["```json\n", errorMsg, "\n```"].join(""));
   }
 }
 

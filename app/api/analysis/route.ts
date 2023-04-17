@@ -14,12 +14,12 @@ export async function POST(req: NextRequest) {
     if (ENV !== "production") {
       return NextResponse.json(ENV);
     }
-    const userId = req.cookies.get("userId");
+    const userId = req.headers.get("userId");
     const analysis = (await req.json()) as Analysis;
     const result = await supabaseClient.from("documents_v2_analysis").insert({
       answer: analysis.userMessage.content,
       question: analysis.botMessage.content,
-      userId,
+      userId: userId,
       type: 1,
     });
     console.debug(`result is ${result}`);

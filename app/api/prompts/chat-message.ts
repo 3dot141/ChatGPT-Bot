@@ -11,40 +11,15 @@ export type SessionMsg = {
   recentMessages: Message[];
 };
 
-async function makeFrMsgChain(
-  apiKey: string,
-  content: string,
-  recentMessages: Message[],
+export enum QueryType {
+  FR_HELPER = 1,
+  FR_QUESTION = 2,
+}
+
+function parseDoc2MessageChain(
+  documents: [{ content: string; url: string }],
+  query: string,
 ) {
-  const query = content.slice(3);
-
-  // OpenAI recommends replacing newlines with spaces for best results
-  const input = query.replace(/\n/g, " ");
-  // console.log("input: ", input);
-
-  const embeddingResponse = await requestEmbedding(apiKey, input);
-
-  const embeddingData = await embeddingResponse.json();
-  if (embeddingData.error) {
-    throw new Error(JSON.stringify(embeddingData.error));
-  }
-  const [{ embedding }] = embeddingData.data;
-  // console.log("embedding: ", embedding);
-
-  const { data: documents, error } = await supabaseClient.rpc(
-    "match_documents_v2",
-    {
-      query_embedding: embedding,
-      similarity_threshold: 0.1, // Choose an appropriate threshold for your data
-      match_count: 5, // Choose the number of matches
-    },
-  );
-
-  if (error) {
-    console.error(error);
-    throw error;
-  }
-
   const tokenizer = new GPT3Tokenizer({ type: "gpt3" });
   let tokenCount = 0;
   let contextText = "";
@@ -93,7 +68,7 @@ async function makeFrMsgChain(
   SOURCES:
   \- [next.js官网](https://nextjs.org/docs/faq)`;
 
-  const userMessage: Message = {
+  const queryMessage: Message = {
     role: "user",
     content: `CONTEXT:
   ${contextText}
@@ -102,6 +77,51 @@ async function makeFrMsgChain(
   在FineReport中，${query}
   `,
   };
+  return { systemContent, userContent, assistantContent, queryMessage };
+}
+
+async function queryDocuments(embedding: []) {
+  const { data: documents, error } = await supabaseClient.rpc(
+    "match_documents_v2_type",
+    {
+      query_embedding: embedding,
+      similarity_threshold: 0.1, // Choose an appropriate threshold for your data
+      match_count: 5, // Choose the number of matches
+      type: QueryType.FR_HELPER,
+    },
+  );
+
+  if (error) {
+    console.error(error);
+    throw error;
+  }
+  return documents;
+}
+
+async function makeFrMsgChain(
+  apiKey: string,
+  content: string,
+  recentMessages: Message[],
+) {
+  const query = content.slice(3);
+
+  // OpenAI recommends replacing newlines with spaces for best results
+  const input = query.replace(/\n/g, " ");
+  // console.log("input: ", input);
+
+  const embeddingResponse = await requestEmbedding(apiKey, input);
+
+  const embeddingData = await embeddingResponse.json();
+  if (embeddingData.error) {
+    throw new Error(JSON.stringify(embeddingData.error));
+  }
+  const [{ embedding }] = embeddingData.data;
+  // console.log("embedding: ", embedding);
+
+  const documents = await queryDocuments(embedding);
+
+  const { systemContent, userContent, assistantContent, queryMessage } =
+    parseDoc2MessageChain(documents, query);
 
   const recentMsgList: Message[] = [
     ...recentMessages,
@@ -119,8 +139,8 @@ async function makeFrMsgChain(
     },
   ];
 
-  console.log("messages: ", userMessage);
-  return { userMessage: userMessage, recentMessages: recentMsgList };
+  console.log("messages: ", queryMessage);
+  return { userMessage: queryMessage, recentMessages: recentMsgList };
 }
 
 /**
@@ -139,7 +159,8 @@ async function makeChatMessages(
 
   const splits = content.split(" ");
   if (splits && splits.length !== 0) {
-    if ("fr" === splits[0].toLowerCase()) {
+    const promptKey = splits[0].toLowerCase();
+    if ("fr" === promptKey) {
       // @ts-ignore
       return await makeFrMsgChain(apiKey, content, recentMessages);
     }

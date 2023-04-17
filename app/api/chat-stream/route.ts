@@ -1,7 +1,7 @@
 import { createParser } from "eventsource-parser";
 import { NextRequest } from "next/server";
 import { doRequestOpenai } from "../common";
-import { preHandleMessage } from "@/app/api/chat-message";
+import { preHandleMessage } from "@/app/api/prompts/chat-message";
 import { CreateChatCompletionRequest } from "openai/api";
 import { Request } from "node-fetch";
 
@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
       };
       errorMsg = JSON.stringify(serializedError, null, 2);
     } else {
-      errorMsg = String(error);
+      errorMsg = JSON.stringify(error);
     }
     return new Response(["```json\n", errorMsg, "\n```"].join(""));
   }

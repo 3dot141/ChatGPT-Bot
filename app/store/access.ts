@@ -1,9 +1,12 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { uuid } from "uuidv4";
+import { v4 } from "uuid";
 
 export interface AccessControlStore {
   accessCode: string;
   token: string;
+  userId: string;
 
   needCode: boolean;
 
@@ -22,6 +25,7 @@ export const useAccessStore = create<AccessControlStore>()(
   persist(
     (set, get) => ({
       token: "",
+      userId: v4(),
       accessCode: "",
       needCode: true,
       enabledAccessControl() {

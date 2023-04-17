@@ -87,7 +87,7 @@ async function makeFrMsgChain(
  * @param recentMessages
  */
 async function makeChatMessages(
-  apiKey: string | null,
+  apiKey: string,
   userMessage: Message,
   recentMessages: Message[],
 ): Promise<SessionMsg> {
@@ -131,7 +131,7 @@ async function makeChatMessages(
   return { userMessage: userMessage, recentMessages: recentMessages };
 }
 export async function preHandleMessage(
-  apiKey: string | null,
+  apiKey: string,
   completionReq: CreateChatCompletionRequest,
 ): Promise<CreateChatCompletionRequest> {
   try {

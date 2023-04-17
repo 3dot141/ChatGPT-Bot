@@ -67,7 +67,10 @@ export async function POST(req: NextRequest) {
 
     const completionReq = (await body) as CreateChatCompletionRequest;
 
-    const chatCompletionRequest = await preHandleMessage(apiKey, completionReq);
+    const chatCompletionRequest = await preHandleMessage(
+      apiKey ?? "",
+      completionReq,
+    );
     const res = await doRequestOpenai({
       headers: req.headers,
       method: req.method,

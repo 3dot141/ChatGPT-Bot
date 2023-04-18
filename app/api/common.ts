@@ -43,11 +43,18 @@ export async function doRequestOpenai(req: CustomRequest) {
     body: req.body,
   });
 }
+
+/**
+ * 可以通过 NextRequest 进行简单的创建，转发工作
+ *
+ * @param apiKey api-key
+ * @param content 内容
+ */
 export async function requestEmbedding(apiKey: string, content: string) {
   const headers = new Headers();
   headers.set("token", apiKey);
   headers.set("path", "v1/embeddings");
-  return doRequestOpenai({
+  const req = new NextRequest("https://demo.com/embedding", {
     headers: headers,
     method: "POST",
     body: JSON.stringify({
@@ -55,4 +62,6 @@ export async function requestEmbedding(apiKey: string, content: string) {
       model: "text-embedding-ada-002",
     }),
   });
+
+  return requestOpenai(req);
 }

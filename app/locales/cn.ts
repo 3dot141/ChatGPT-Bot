@@ -9,7 +9,7 @@ const cn = {
     ChatItemCount: (count: number) => `${count} 条对话`,
   },
   Chat: {
-    SubTitle: (count: number) => `与 ChatGPT 的 ${count} 条对话`,
+    SubTitle: (count: number) => `与 FineGPT 的 ${count} 条对话`,
     Actions: {
       ChatList: "查看消息列表",
       CompressedHistory: "查看压缩后的历史 Prompt",
@@ -148,7 +148,7 @@ const cn = {
   Store: {
     DefaultTopic: "新的聊天",
     BotHello:
-      "直接输入会和 ChatGPT 聊天，输入 / 可以搜索目前支持的范式。\n直接输入 fr空格，例如输入【fr 定时调度】，可以变身小助手",
+      '直接输入会和 FineGPT 聊天，建议使用"输入 / 可以搜索目前支持的范式"。\n直接输入 fr空格，例如输入【fr 定时调度】，可以变身小助手',
     Error: "出错了，请稍后重试或者清空聊天内容后重试",
     Prompt: {
       History: (content: string) =>

@@ -19,7 +19,7 @@ export enum QueryType {
   FR_QUESTION = 2,
 }
 
-export type Document = { content: string; url: string };
+export type Document = { title: string; content: string; url: string };
 
 export type MessageChain = {
   systemContent: string;

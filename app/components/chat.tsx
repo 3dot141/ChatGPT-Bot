@@ -1,5 +1,5 @@
-import { useDebounce, useDebouncedCallback } from "use-debounce";
-import { memo, useState, useRef, useEffect, useLayoutEffect } from "react";
+import { useDebouncedCallback } from "use-debounce";
+import { memo, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import SendWhiteIcon from "../icons/send-white.svg";
 import BrainIcon from "../icons/brain.svg";
@@ -19,25 +19,29 @@ import DarkIcon from "../icons/dark.svg";
 import AutoIcon from "../icons/auto.svg";
 import BottomIcon from "../icons/bottom.svg";
 
+import LikeIcon from "../icons/like.svg";
+import UnlikeIcon from "../icons/unlike.svg";
+
 import {
-  Message,
-  SubmitKey,
-  useChatStore,
   BOT_HELLO,
-  ROLES,
   createMessage,
-  useAccessStore,
+  Message,
+  ROLES,
+  SubmitKey,
   Theme,
+  useAccessStore,
+  useChatStore,
 } from "../store";
 
 import {
+  autoGrowTextArea,
   copyToClipboard,
   downloadAs,
   getEmojiUrl,
   isMobileScreen,
+  LikeType,
+  recordLikeOrUnlike,
   selectOrCopy,
-  autoGrowTextArea,
-  getCSSVar,
 } from "../utils";
 
 import dynamic from "next/dynamic";
@@ -736,6 +740,25 @@ export function Chat(props: {
                           onClick={() => copyToClipboard(message.content)}
                         >
                           {Locale.Chat.Actions.Copy}
+                        </div>
+                        <div className={styles["chat-message-top-action"]}>
+                          {" | "}
+                        </div>
+                        <div
+                          className={styles["chat-message-top-action"]}
+                          onClick={() =>
+                            recordLikeOrUnlike(messages, i, LikeType.UnLike)
+                          }
+                        >
+                          <UnlikeIcon />
+                        </div>
+                        <div
+                          className={styles["chat-message-top-action"]}
+                          onClick={() =>
+                            recordLikeOrUnlike(messages, i, LikeType.Like)
+                          }
+                        >
+                          <LikeIcon />
                         </div>
                       </div>
                     )}

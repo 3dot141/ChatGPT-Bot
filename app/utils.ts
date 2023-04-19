@@ -1,6 +1,8 @@
 import { EmojiStyle } from "emoji-picker-react";
 import { showToast } from "./components/ui-lib";
 import Locale from "./locales";
+import { Message } from "@/app/store";
+import { requestAnalysisLike } from "@/app/requests";
 
 export function trimTopic(topic: string) {
   return topic.replace(/[，。！？”“"、,.!?]*$/, "");
@@ -24,6 +26,19 @@ export async function copyToClipboard(text: string) {
     }
     document.body.removeChild(textArea);
   }
+}
+
+export enum LikeType {
+  Like = 0,
+  UnLike = 1,
+}
+
+export async function recordLikeOrUnlike(
+  messages: Message[],
+  index: number,
+  type: LikeType,
+) {
+  requestAnalysisLike(messages[index - 1], messages[index], type);
 }
 
 export function downloadAs(text: string, filename: string) {

@@ -7,6 +7,7 @@ export const ENV = process.env.NODE_ENV;
 type Analysis = {
   userMessage: ChatCompletionRequestMessage;
   botMessage: ChatCompletionRequestMessage;
+  type: number;
 };
 
 export async function POST(req: NextRequest) {
@@ -16,12 +17,14 @@ export async function POST(req: NextRequest) {
     }
     const userId = req.headers.get("userId");
     const analysis = (await req.json()) as Analysis;
-    const result = await supabaseClient.from("documents_v2_analysis").insert({
-      answer: analysis.userMessage.content,
-      question: analysis.botMessage.content,
-      userId: userId,
-      type: 1,
-    });
+    const result = await supabaseClient
+      .from("documents_v2_analysis_like")
+      .insert({
+        answer: analysis.userMessage.content,
+        question: analysis.botMessage.content,
+        userId: userId,
+        type: analysis.type,
+      });
     return NextResponse.json("success");
   } catch (e) {
     return NextResponse.json("error");

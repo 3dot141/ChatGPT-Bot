@@ -170,6 +170,22 @@ export async function requestAnalysis(
   });
 }
 
+export async function requestAnalysisLike(
+  userMessage: Message,
+  botMessage: Message,
+  type: number,
+) {
+  // 只发送，不反馈
+  fetch("/api/analysis-like", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...getHeaders(),
+    },
+    body: JSON.stringify({ userMessage, botMessage, type }),
+  });
+}
+
 export async function requestChatStream(
   messages: Message[],
   options?: {

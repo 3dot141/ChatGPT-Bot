@@ -106,7 +106,7 @@ async function makeChatMessages(
         helperMessage,
       );
     }
-    if ("fr-question" === promptKey) {
+    if ("fr-que" === promptKey) {
       const questionMessage = new QuestionMessage();
       // @ts-ignore
       return await makeFrMsgChain(
@@ -116,7 +116,7 @@ async function makeChatMessages(
         questionMessage,
       );
     }
-    if ("fr-knowledge" === promptKey) {
+    if ("fr-front" === promptKey) {
       const assistantMessage = new AssistantMessage();
       // @ts-ignore
       return await makeFrMsgChain(
@@ -128,8 +128,10 @@ async function makeChatMessages(
     }
   }
 
-  return { userMessage: userMessage, recentMessages: recentMessages };
+  throw new ChatFocusError();
 }
+
+export class ChatFocusError extends Error {}
 export async function preHandleMessage(
   apiKey: string,
   completionReq: CreateChatCompletionRequest,

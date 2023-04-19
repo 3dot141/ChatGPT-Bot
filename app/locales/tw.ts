@@ -149,6 +149,8 @@ const tw: LocaleType = {
     DefaultTopic: "新的對話",
     BotHello: "請問需要我的協助嗎？",
     Error: "出錯了，請稍後再嘗試",
+    Focus:
+      '当前的工具是作为效率工具，请按照规范提问。\n 输入 / 可以使用目前支持的范式"。\n 或者直接输入 fr空格，示例输入【fr 定时调度】，',
     Prompt: {
       History: (content: string) =>
         "這是 AI 與用戶的歷史聊天總結，作為前情提要：" + content,

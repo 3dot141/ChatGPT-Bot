@@ -153,6 +153,8 @@ const en: LocaleType = {
     DefaultTopic: "New Conversation",
     BotHello: "Hello! How can I assist you today?",
     Error: "Something went wrong, please try again later.",
+    Focus:
+      "当前的工具是作为效率工具，请按照规范提问。\n 输入 / 触发补全查看使用目前支持的范式。\n 或者直接输入 fr空格，示： \n 输入【fr 定时调度】",
     Prompt: {
       History: (content: string) =>
         "This is a summary of the chat history between the AI and the user as a recap: " +

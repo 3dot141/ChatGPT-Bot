@@ -427,6 +427,8 @@ export const useChatStore = create<ChatStore>()(
           onError(error, statusCode) {
             if (statusCode === 401) {
               botMessage.content = Locale.Error.Unauthorized;
+            } else if (statusCode === 500) {
+              botMessage.content = Locale.Store.Focus;
             } else {
               botMessage.content += "\n\n" + Locale.Store.Error;
             }

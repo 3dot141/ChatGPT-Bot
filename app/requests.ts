@@ -257,6 +257,8 @@ export async function requestChatStream(
     } else if (res.status === 401) {
       console.error("Unauthorized");
       options?.onError(new Error("Unauthorized"), res.status);
+    } else if (res.status === 500) {
+      options?.onError(new Error(""), res.status);
     } else {
       console.error("Stream Error", res.body);
       options?.onError(new Error("Stream Error"), res.status);

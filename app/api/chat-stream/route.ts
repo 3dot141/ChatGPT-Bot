@@ -1,7 +1,10 @@
 import { createParser } from "eventsource-parser";
 import { NextRequest } from "next/server";
 import { doRequestOpenai } from "../common";
-import { preHandleMessage } from "@/app/api/prompts/chat-message";
+import {
+  ChatFocusError,
+  preHandleMessage,
+} from "@/app/api/prompts/chat-message";
 import { CreateChatCompletionRequest } from "openai/api";
 import { Request } from "node-fetch";
 
@@ -82,6 +85,11 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("[Chat Stream]", error);
     let errorMsg: string;
+    if (error instanceof ChatFocusError) {
+      return new Response("", {
+        status: 500,
+      });
+    }
     if (error instanceof Error) {
       const serializedError = {
         message: error.message,

@@ -155,6 +155,8 @@ const tr: LocaleType = {
     DefaultTopic: "Yeni Konuşma",
     BotHello: "Merhaba! Size bugün nasıl yardımcı olabilirim?",
     Error: "Bir şeyler yanlış gitti. Lütfen daha sonra tekrar deneyiniz.",
+    Focus:
+      '当前的工具是作为效率工具，请按照规范提问，\n  建议使用"输入 / 可以搜索目前支持的范式"。\n或者直接输入 fr空格，示例输入【fr 定时调度】，',
     Prompt: {
       History: (content: string) =>
         "Bu, yapay zeka ile kullanıcı arasındaki sohbet geçmişinin bir özetidir: " +

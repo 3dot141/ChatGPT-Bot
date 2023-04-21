@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseClient } from "@/app/lib/embeddings-supabase";
-import { ChatCompletionRequestMessage } from "openai";
+
+export const dynamic = "force-dynamic";
 
 enum QyAPI {
   corpId = "ww3d23af6a5aa9884d",

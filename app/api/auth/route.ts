@@ -30,14 +30,14 @@ async function getAccessToken(
   corpId: string,
   corpSecret: string,
 ): Promise<string> {
-  const url = `https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=${corpId}&corpsecret=${corpSecret}`;
+  const url = `https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=${corpId}&corpsecret=${corpSecret}&debug=1`;
   const result = await fetch(url);
   const json = (await result.json()) as AccessTokenResult;
   return json.access_token;
 }
 
 async function getUserName(accessToken: string, code: string): Promise<string> {
-  const userIdUrl = `https://qyapi.weixin.qq.com/cgi-bin/auth/getuserinfo?access_token=${accessToken}&code=${code}`;
+  const userIdUrl = `https://qyapi.weixin.qq.com/cgi-bin/auth/getuserinfo?access_token=${accessToken}&code=${code}&debug=1`;
   const userIdResponse = await fetch(userIdUrl);
   const userIdResult = (await userIdResponse.json()) as UserIdResult;
   if (userIdResult.errcode !== 0) {
@@ -45,7 +45,7 @@ async function getUserName(accessToken: string, code: string): Promise<string> {
   }
   const userId = userIdResult.userid;
 
-  const userProfileUrl = `https://qyapi.weixin.qq.com/cgi-bin/user/get?access_token=${accessToken}&userid=${userId}`;
+  const userProfileUrl = `https://qyapi.weixin.qq.com/cgi-bin/user/get?access_token=${accessToken}&userid=${userId}&debug=1`;
   const userProfileResponse = await fetch(userProfileUrl);
   const userProfileResult =
     (await userProfileResponse.json()) as UserProfileResult;
@@ -64,6 +64,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(`userName is ${userName}`);
   } catch (e) {
+    console.error(e);
     return NextResponse.json(`error is ${e}`);
   }
 }

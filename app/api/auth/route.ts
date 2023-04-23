@@ -31,14 +31,25 @@ async function getAccessToken(
   corpSecret: string,
 ): Promise<string> {
   const url = `https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=${corpId}&corpsecret=${corpSecret}&debug=1`;
-  const result = await fetch(url);
+  const headers = new Headers();
+  headers.set("X-Forwarded-For", "180.113.40.148");
+
+  const result = await fetch(url, {
+    headers,
+  });
   const json = (await result.json()) as AccessTokenResult;
   return json.access_token;
 }
 
 async function getUserName(accessToken: string, code: string): Promise<string> {
   const userIdUrl = `https://qyapi.weixin.qq.com/cgi-bin/auth/getuserinfo?access_token=${accessToken}&code=${code}&debug=1`;
-  const userIdResponse = await fetch(userIdUrl);
+  const headers = new Headers();
+  headers.set("X-Forwarded-For", "180.113.40.148");
+
+  const userIdResponse = await fetch(userIdUrl, {
+    headers,
+  });
+
   const userIdResult = (await userIdResponse.json()) as UserIdResult;
   if (userIdResult.errcode !== 0) {
     throw new Error(userIdResult.errmsg);

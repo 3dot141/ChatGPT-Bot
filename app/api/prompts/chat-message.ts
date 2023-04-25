@@ -39,13 +39,11 @@ async function makeFrMsgChain(
   recentMessages: Message[],
   messageMaker: MessageMaker,
 ) {
-  const query = content.slice(3);
-
   // OpenAI recommends replacing newlines with spaces for best results
-  const input = query.replace(/\n/g, " ");
+  const query = content.replace(/\n/g, " ");
   // console.log("input: ", input);
 
-  const embeddingResponse = await requestEmbedding(apiKey, input);
+  const embeddingResponse = await requestEmbedding(apiKey, query);
 
   const embeddingData = await embeddingResponse.json();
   if (embeddingData.error) {
@@ -96,22 +94,18 @@ async function makeChatMessages(
   const splits = content.split(" ");
   if (splits && splits.length !== 0) {
     const promptKey = splits[0].toLowerCase();
+    const input = splits.slice(1).join(" ");
     if ("fr" === promptKey) {
       const helperMessage = new HelperMessage();
       // @ts-ignore
-      return await makeFrMsgChain(
-        apiKey,
-        content,
-        recentMessages,
-        helperMessage,
-      );
+      return await makeFrMsgChain(apiKey, input, recentMessages, helperMessage);
     }
     if ("fr-que" === promptKey) {
       const questionMessage = new QuestionMessage();
       // @ts-ignore
       return await makeFrMsgChain(
         apiKey,
-        content,
+        input,
         recentMessages,
         questionMessage,
       );
@@ -121,7 +115,7 @@ async function makeChatMessages(
       // @ts-ignore
       return await makeFrMsgChain(
         apiKey,
-        content,
+        input,
         recentMessages,
         assistantMessage,
       );

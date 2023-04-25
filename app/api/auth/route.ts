@@ -34,9 +34,7 @@ async function getAccessToken(
   const headers = new Headers();
   headers.set("X-Forwarded-For", "180.113.40.148");
 
-  const result = await fetch(url, {
-    headers,
-  });
+  const result = await fetch(url, { headers });
   const json = (await result.json()) as AccessTokenResult;
   return json.access_token;
 }

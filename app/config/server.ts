@@ -38,8 +38,9 @@ export const getServerSideConfig = () => {
     needCode: ACCESS_CODES.size > 0,
     proxyUrl: process.env.PROXY_URL,
     isVercel: !!process.env.VERCEL,
+
     needQyWxLogin: !!process.env.CORP_ID,
     corpId: process.env.CORP_ID,
-    appId: process.env.APP_ID,
+    agentId: process.env.APP_ID,
   };
 };

@@ -20,6 +20,6 @@ export async function POST(req: NextRequest) {
     needCode: serverConfig.needCode,
     needQyWxLogin: serverConfig.needQyWxLogin,
     corpId: serverConfig.corpId,
-    appId: serverConfig.appId,
+    agentId: serverConfig.agentId,
   });
 }

@@ -4,8 +4,8 @@ import type { LocaleType } from "./index";
 const en: LocaleType = {
   WIP: "WIP...",
   Error: {
-    Unauthorized:
-      "Unauthorized access, please enter access code in settings page.",
+    NoAccess: "现在是未授权状态，请点击左下角设置按钮输入访问密码。",
+    NoQyLogin: "企业微信未授权，请点击左下角设置按钮进行企业微信授权。",
   },
   ChatItem: {
     ChatItemCount: (count: number) => `${count} messages`,
@@ -147,6 +147,11 @@ const en: LocaleType = {
       Title: "Presence Penalty",
       SubTitle:
         "A larger value increases the likelihood to talk about new topics",
+    },
+    Login: {
+      Title: "企微授权",
+      SubTitle: "点击右边的按钮后，扫码授权",
+      Text: "授权",
     },
   },
   Store: {

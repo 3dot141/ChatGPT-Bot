@@ -4,8 +4,8 @@ import type { LocaleType } from "./index";
 const tr: LocaleType = {
   WIP: "Çalışma devam ediyor...",
   Error: {
-    Unauthorized:
-      "Yetkisiz erişim, lütfen erişim kodunu ayarlar sayfasından giriniz.",
+    NoAccess: "现在是未授权状态，请点击左下角设置按钮输入访问密码。",
+    NoQyLogin: "企业微信未授权，请点击左下角设置按钮进行企业微信授权。",
   },
   ChatItem: {
     ChatItemCount: (count: number) => `${count} mesaj`,
@@ -149,6 +149,11 @@ const tr: LocaleType = {
       Title: "Varlık Cezası",
       SubTitle:
         "Daha büyük bir değer, yeni konular hakkında konuşma olasılığını artırır",
+    },
+    Login: {
+      Title: "企微授权",
+      SubTitle: "点击右边的按钮后，扫码授权",
+      Text: "授权",
     },
   },
   Store: {

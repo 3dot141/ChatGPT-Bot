@@ -4,7 +4,8 @@ import type { LocaleType } from "./index";
 const tw: LocaleType = {
   WIP: "該功能仍在開發中……",
   Error: {
-    Unauthorized: "目前您的狀態是未授權，請前往設定頁面輸入授權碼。",
+    NoAccess: "现在是未授权状态，请点击左下角设置按钮输入访问密码。",
+    NoQyLogin: "企业微信未授权，请点击左下角设置按钮进行企业微信授权。",
   },
   ChatItem: {
     ChatItemCount: (count: number) => `${count} 條對話`,
@@ -143,6 +144,11 @@ const tw: LocaleType = {
     PresencePenlty: {
       Title: "話題新穎度 (presence_penalty)",
       SubTitle: "值越大，越有可能擴展到新話題",
+    },
+    Login: {
+      Title: "企微授权",
+      SubTitle: "点击右边的按钮后，扫码授权",
+      Text: "授权",
     },
   },
   Store: {

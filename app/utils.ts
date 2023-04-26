@@ -38,9 +38,11 @@ export function qyWxLogin() {
       console.log("[Config] got config from server", res);
       const appId = res.corpId;
       const agentId = res.agentId;
-      const origin_uri = location.origin;
-      const redirect_uri = origin_uri + "/" + "api/auth";
+      const origin_uri = encodeURIComponent(location.origin);
+      const redirect_uri = encodeURIComponent(origin_uri + "/" + "api/auth");
       const wxLoginUrl = `https://login.work.weixin.qq.com/wwlogin/sso/login?login_type=CorpApp&appid=${appId}&agentid=${agentId}&redirect_uri=${redirect_uri}&state=${origin_uri}`;
+
+      console.error(`login uri is ${wxLoginUrl}`);
       location.href = wxLoginUrl;
     })
     .catch(() => {

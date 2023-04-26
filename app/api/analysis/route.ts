@@ -4,9 +4,18 @@ import { ChatCompletionRequestMessage } from "openai";
 
 export const ENV = process.env.NODE_ENV;
 
+enum AnalysisType {
+  NO = 0,
+  OK = 1,
+}
+
+type AnalysisMessage = ChatCompletionRequestMessage & {
+  isError?: boolean;
+};
+
 type Analysis = {
-  userMessage: ChatCompletionRequestMessage;
-  botMessage: ChatCompletionRequestMessage;
+  userMessage: AnalysisMessage;
+  botMessage: AnalysisMessage;
 };
 
 export async function POST(req: NextRequest) {
@@ -20,7 +29,7 @@ export async function POST(req: NextRequest) {
       answer: analysis.userMessage.content,
       question: analysis.botMessage.content,
       userId: userId,
-      type: 1,
+      type: analysis.botMessage.isError ? AnalysisType.NO : AnalysisType.OK,
     });
     return NextResponse.json("success");
   } catch (e) {

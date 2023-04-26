@@ -30,6 +30,20 @@ export function middleware(req: NextRequest) {
     );
   }
 
+  const username = req.headers.get("username");
+  if (serverConfig.needQyWxLogin && !username) {
+    return NextResponse.json(
+      {
+        error: true,
+        needQyWxLogin: true,
+        msg: "Please go settings page and authorize your work wechat account.",
+      },
+      {
+        status: 402,
+      },
+    );
+  }
+
   // inject api key
   if (!token) {
     const apiKey = serverConfig.apiKey;

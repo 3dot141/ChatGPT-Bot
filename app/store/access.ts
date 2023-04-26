@@ -59,17 +59,24 @@ export const useAccessStore = create<AccessControlStore>()(
         get().fetch();
         return get().needQyWxLogin;
       },
+      /**
+       * 在控制中
+       */
       isQyWxControl() {
-        const hasUsername = !!get().username;
-        if (hasUsername) {
-          return hasUsername;
-        } else {
+        // 如果没开启，说明在控制中
+        if (!this.enableQyWxLogin()) {
+          return true;
+        }
+        let hasUsername = !!get().username;
+        if (!hasUsername) {
           const username = getUserName();
           if (username) {
             this.updateUserName(username);
           }
         }
-        return !!get().username;
+        hasUsername = !!get().username;
+        // 如果有用户，说明在控制中
+        return hasUsername;
       },
 
       accessCode: "",

@@ -1,0 +1,13 @@
+mode:
+  - static
+  - node
+cloud:
+  function:
+    env:
+      SUPABASE_ANON_KEY:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imduem9jaHdnaWZscHBwZHl3Y2J4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2Nzk4OTcyMjgsImV4cCI6MTk5NTQ3MzIyOH0.NzciVkuxkyEOXpHko2rU_qvAPiAbxkgFrg_ToulHn5w"
+      NEXT_PUBLIC_SUPABASE_URL:"https://gnzochwgiflpppdywcbx.supabase.co"
+      OPENAI_API_KEY:"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"
+      BASE_URL:"chatgpt.3dot141.xyz"
+      CORP_ID:"ww1cfe92ce0552bbe8"
+      APP_ID:"1000419"
+      CORP_SECRET:"vPvxwYJYtx1U8jHXYQcuUQd0VvP7Fv5xG5Hb_hzThN8"

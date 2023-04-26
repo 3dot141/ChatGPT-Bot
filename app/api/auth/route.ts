@@ -75,16 +75,18 @@ async function getUserName(accessToken: string, code: string): Promise<string> {
 
 export async function GET(req: NextRequest) {
   try {
-    const code = req.nextUrl.searchParams.get("code") as string;
+    const params = req.nextUrl.searchParams;
+    const code = params.get("code") as string;
+    const state = params.get("state") as string;
     const accessToken = await getAccessToken(
       qyAPI.corpId,
       qyAPI.corpSecret ?? "",
     );
     const userName = await getUserName(accessToken, code);
 
-    const { origin } = req.nextUrl;
+    console.error(`next url is ${req.nextUrl}`);
 
-    const response = NextResponse.rewrite(`${origin}`);
+    const response = NextResponse.redirect(`${state}`);
     response.cookies.set("username", userName);
     return response;
   } catch (e) {

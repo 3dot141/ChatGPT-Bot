@@ -122,7 +122,7 @@ async function makeChatMessages(
     }
   }
 
-  throw new ChatFocusError();
+  return { userMessage: userMessage, recentMessages: recentMessages };
 }
 
 export class ChatFocusError extends Error {}

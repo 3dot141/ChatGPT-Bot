@@ -2,11 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-enum QyAPI {
-  corpId = "ww3d23af6a5aa9884d",
+declare global {
+  type QyAPI = {
+    corpId: string;
 
-  corpSecret = "hzDn2sSnBv82_bmTiK4l4EMrHMnWtx-GhCOMLk-FerY",
+    agentId?: string;
+
+    corpSecret?: string;
+  };
 }
+
+const qyAPI: QyAPI = {
+  corpId: process.env.CORP_ID ?? "",
+
+  corpSecret: process.env.CORP_SECRET ?? "",
+};
 
 type QyResult = {
   errcode: number;
@@ -32,7 +42,6 @@ async function getAccessToken(
 ): Promise<string> {
   const url = `https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=${corpId}&corpsecret=${corpSecret}&debug=1`;
   const headers = new Headers();
-  headers.set("X-Forwarded-For", "180.113.40.148");
 
   const result = await fetch(url, { headers });
   const json = (await result.json()) as AccessTokenResult;
@@ -42,7 +51,6 @@ async function getAccessToken(
 async function getUserName(accessToken: string, code: string): Promise<string> {
   const userIdUrl = `https://qyapi.weixin.qq.com/cgi-bin/auth/getuserinfo?access_token=${accessToken}&code=${code}&debug=1`;
   const headers = new Headers();
-  headers.set("X-Forwarded-For", "180.113.40.148");
 
   const userIdResponse = await fetch(userIdUrl, {
     headers,
@@ -68,10 +76,17 @@ async function getUserName(accessToken: string, code: string): Promise<string> {
 export async function GET(req: NextRequest) {
   try {
     const code = req.nextUrl.searchParams.get("code") as string;
-    const accessToken = await getAccessToken(QyAPI.corpId, QyAPI.corpSecret);
+    const accessToken = await getAccessToken(
+      qyAPI.corpId,
+      qyAPI.corpSecret ?? "",
+    );
     const userName = await getUserName(accessToken, code);
 
-    return NextResponse.json(`userName is ${userName}`);
+    const { origin } = req.nextUrl;
+
+    const response = NextResponse.rewrite(`${origin}`);
+    response.cookies.set("username", userName);
+    return response;
   } catch (e) {
     console.error(e);
     return NextResponse.json(`error is ${e}`);

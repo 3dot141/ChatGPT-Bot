@@ -52,8 +52,8 @@ function getHeaders() {
     headers["token"] = accessStore.token;
   }
 
-  if (accessStore.userId && accessStore.userId.length > 0) {
-    headers["userId"] = accessStore.userId;
+  if (accessStore.username && accessStore.username.length > 0) {
+    headers["userId"] = accessStore.username;
   }
 
   return headers;

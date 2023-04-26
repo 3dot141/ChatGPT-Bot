@@ -36,13 +36,6 @@
     "gpt3-tokenizer": "^1.1.5",
     "@supabase/supabase-js": "^2.0.0",
 
-    "langchain": "^0.0.41",
-    "serpapi": "^1.1.1",
-    "@dqbd/tiktoken": "^1.0.6",
-    "cohere-ai": "^6.2.0",
-    "@huggingface/inference": "^2.0.0",
-    "typeorm": "^0.3.15",
-
     "d3-dsv": "^3.0.1",
     "fast-csv": "^4.3.6",
     "autoprefixer": "^10.4.13",

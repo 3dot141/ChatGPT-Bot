@@ -26,7 +26,7 @@ import {
 import { Avatar } from "./chat";
 
 import Locale, { AllLangs, changeLang, getLang } from "../locales";
-import { getEmojiUrl } from "../utils";
+import { getEmojiUrl, qyWxLogin } from "../utils";
 import Link from "next/link";
 import { UPDATE_URL } from "../constant";
 import { SearchService, usePromptStore } from "../store/prompt";
@@ -120,11 +120,17 @@ export function Settings(props: { closeSettings: () => void }) {
     [],
   );
 
+  const enabledQyWxLogin = useMemo(
+    () => accessStore.enableQyWxLogin(),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+
   const promptStore = usePromptStore();
   const builtinCount = SearchService.count.builtin;
   const customCount = promptStore.prompts.size ?? 0;
 
-  const showUsage = accessStore.isAuthorized();
+  const showUsage = accessStore.isAccessControl();
   useEffect(() => {
     checkUpdate();
     showUsage && checkUsage();
@@ -359,6 +365,21 @@ export function Settings(props: { closeSettings: () => void }) {
                 onChange={(e) => {
                   accessStore.updateCode(e.currentTarget.value);
                 }}
+              />
+            </SettingItem>
+          ) : (
+            <></>
+          )}
+
+          {enabledQyWxLogin ? (
+            <SettingItem
+              title={Locale.Settings.Login.Title}
+              subTitle={Locale.Settings.Login.SubTitle}
+            >
+              <IconButton
+                icon={<EditIcon />}
+                text={Locale.Settings.Login.Text}
+                onClick={() => qyWxLogin()}
               />
             </SettingItem>
           ) : (

@@ -566,8 +566,11 @@ export function Chat(props: {
     session.messages.at(0)?.content !== BOT_HELLO.content
   ) {
     const copiedHello = Object.assign({}, BOT_HELLO);
-    if (!accessStore.isAuthorized()) {
-      copiedHello.content = Locale.Error.Unauthorized;
+    if (!accessStore.isAccessControl()) {
+      copiedHello.content = Locale.Error.NoAccess;
+    }
+    if (!accessStore.isQyWxControl()) {
+      copiedHello.content = Locale.Error.NoQyLogin;
     }
     context.push(copiedHello);
   }

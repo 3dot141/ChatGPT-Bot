@@ -28,6 +28,26 @@ export async function copyToClipboard(text: string) {
   }
 }
 
+export function qyWxLogin() {
+  fetch("/api/config", {
+    method: "post",
+    body: null,
+  })
+    .then((res) => res.json())
+    .then((res: QyAPI) => {
+      console.log("[Config] got config from server", res);
+      const appId = res.corpId;
+      const agentId = res.agentId;
+      const redirect_uri = location.origin + "/" + "api/auth";
+      const wxLoginUrl = `https://login.work.weixin.qq.com/wwlogin/sso/login?login_type=CorpApp&appid=${appId}&agentid=${agentId}&redirect_uri=${redirect_uri}`;
+      location.href = wxLoginUrl;
+    })
+    .catch(() => {
+      console.error("[Config] failed to fetch config");
+    })
+    .finally(() => {});
+}
+
 export enum LikeType {
   Like = 0,
   UnLike = 1,

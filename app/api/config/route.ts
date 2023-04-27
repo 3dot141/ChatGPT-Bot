@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { getServerSideConfig } from "../../config/server";
+import { WeCom_API } from "@/app/api/wecom/common";
 
 const serverConfig = getServerSideConfig();
 
@@ -16,10 +17,18 @@ declare global {
 }
 
 export async function POST(req: NextRequest) {
-  return NextResponse.json({
-    needCode: serverConfig.needCode,
-    needQyWxLogin: serverConfig.needQyWxLogin,
+  const wecomApi = {
     corpId: serverConfig.corpId,
     agentId: serverConfig.agentId,
+  } as WeComAPI;
+
+  const dangerConfig = {
+    needCode: serverConfig.needCode,
+    needQyWxLogin: serverConfig.needQyWxLogin,
+  } as DangerConfig;
+
+  return NextResponse.json({
+    ...dangerConfig,
+    ...wecomApi,
   });
 }

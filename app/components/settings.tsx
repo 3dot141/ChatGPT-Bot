@@ -26,7 +26,7 @@ import {
 import { Avatar } from "./chat";
 
 import Locale, { AllLangs, changeLang, getLang } from "../locales";
-import { getEmojiUrl, qyWxLogin } from "../utils";
+import { getEmojiUrl, qyWxOAuthLogin } from "../utils";
 import Link from "next/link";
 import { UPDATE_URL } from "../constant";
 import { SearchService, usePromptStore } from "../store/prompt";
@@ -379,7 +379,7 @@ export function Settings(props: { closeSettings: () => void }) {
               <IconButton
                 icon={<EditIcon />}
                 text={Locale.Settings.Login.Text}
-                onClick={() => qyWxLogin()}
+                onClick={() => qyWxOAuthLogin()}
               />
             </SettingItem>
           ) : (

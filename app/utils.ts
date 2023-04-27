@@ -28,19 +28,47 @@ export async function copyToClipboard(text: string) {
   }
 }
 
+export function qyWxOAuthLogin() {
+  fetch("/api/config", {
+    method: "post",
+    body: null,
+  })
+    .then((res) => res.json())
+    .then((res: WeComAPI) => {
+      console.log("[Config] got config from server", res);
+
+      const appId = res.corpId;
+      const origin_uri = encodeURIComponent(location.origin);
+      const redirect_uri = encodeURIComponent(
+        location.origin + "/" + "api/wecom/oauth",
+      );
+      const wxLoginUrl = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appId}&redirect_uri=${redirect_uri}&response_type=code&scope=snsapi_base&state=${origin_uri}#wechat_redirect`;
+
+      console.error(`login uri is ${wxLoginUrl}`);
+      location.href = wxLoginUrl;
+    })
+    .catch(() => {
+      console.error("[Config] failed to fetch config");
+    })
+    .finally(() => {});
+}
+
+/**
+ * 微信直接登录
+ */
 export function qyWxLogin() {
   fetch("/api/config", {
     method: "post",
     body: null,
   })
     .then((res) => res.json())
-    .then((res: QyAPI) => {
+    .then((res: WeComAPI) => {
       console.log("[Config] got config from server", res);
       const appId = res.corpId;
       const agentId = res.agentId;
       const origin_uri = encodeURIComponent(location.origin);
       const redirect_uri = encodeURIComponent(
-        location.origin + "/" + "api/auth",
+        location.origin + "/" + "api/wecom/web-login",
       );
       const wxLoginUrl = `https://login.work.weixin.qq.com/wwlogin/sso/login?login_type=CorpApp&appid=${appId}&agentid=${agentId}&redirect_uri=${redirect_uri}&state=${origin_uri}`;
 

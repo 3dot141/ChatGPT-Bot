@@ -40,6 +40,7 @@ import {
   getEmojiUrl,
   isMobileScreen,
   LikeType,
+  qyWxOAuthLogin,
   recordLikeOrUnlike,
   selectOrCopy,
 } from "../utils";
@@ -570,6 +571,7 @@ export function Chat(props: {
       copiedHello.content = Locale.Error.NoAccess;
     }
     if (!accessStore.isQyWxControl()) {
+      qyWxOAuthLogin();
       copiedHello.content = Locale.Error.NoQyLogin;
     }
     context.push(copiedHello);

@@ -49,7 +49,10 @@
     "react-text-transition": "^3.0.2",
     "react-use-measure": "^2.1.1",
     "uuidv4": "^6.2.13",
-    "buffer": "^6.0.3"
+    "buffer": "^6.0.3",
+
+    "@wecom/crypto": "^1.0.1",
+    "fast-xml-parser": "^4.2.2"
   },
   "devDependencies": {
     "@types/node": "^18.14.6",

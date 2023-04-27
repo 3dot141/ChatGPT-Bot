@@ -1,38 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
+import { WeCom_API, WeComResult } from "@/app/api/wecom/common";
 
 export const dynamic = "force-dynamic";
 
-declare global {
-  type QyAPI = {
-    corpId: string;
-
-    agentId?: string;
-
-    corpSecret?: string;
-  };
-}
-
-const qyAPI: QyAPI = {
-  corpId: process.env.CORP_ID ?? "",
-
-  corpSecret: process.env.CORP_SECRET ?? "",
-};
-
-type QyResult = {
-  errcode: number;
-  errmsg: string;
-};
-
-type AccessTokenResult = QyResult & {
+type AccessTokenResult = WeComResult & {
   access_token: string;
   expires_in: number;
 };
 
-type UserIdResult = QyResult & {
+type UserIdResult = WeComResult & {
   userid: string;
 };
 
-type UserProfileResult = QyResult & {
+type UserProfileResult = WeComResult & {
   name: string;
 };
 
@@ -79,8 +59,8 @@ export async function GET(req: NextRequest) {
     const code = params.get("code") as string;
     const state = params.get("state") as string;
     const accessToken = await getAccessToken(
-      qyAPI.corpId,
-      qyAPI.corpSecret ?? "",
+      WeCom_API.corpId,
+      WeCom_API.corpSecret ?? "",
     );
     const userName = await getUserName(accessToken, code);
 

@@ -41,6 +41,6 @@ export const getServerSideConfig = () => {
 
     needQyWxLogin: !!process.env.CORP_ID,
     corpId: process.env.CORP_ID,
-    agentId: process.env.APP_ID,
+    agentId: process.env.AGENT_ID,
   };
 };

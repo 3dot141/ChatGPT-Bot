@@ -23,15 +23,10 @@ export async function GET(req: NextRequest) {
   );
   console.log("signature", signature);
 
-  // 校验签名是否正确
-  // if (signature === msg_signature) {
-  console.info("签名验证成功");
-  // 如果签名校验正确，解密 message
   const { message } = crypto.decrypt(SERVICE.aeskey, echostr);
   console.log("message", message);
   // 返回 message 信息
   return new NextResponse(message);
-  // }
 }
 
 export async function POST(req: NextRequest) {
@@ -61,9 +56,20 @@ export async function POST(req: NextRequest) {
       const message = callbackDataBody?.message;
       if (message) {
         const messageJson = parser.parse(message);
-        const ticketData = messageJson?.xml?.SuiteTicket;
-        if (ticketData) {
-          SERVICE.suite_ticket = ticketData;
+        const infoType = messageJson?.xml?.InfoType;
+        if (infoType) {
+          if (infoType === "suite_ticket") {
+            const ticketData = messageJson?.xml?.SuiteTicket;
+            if (ticketData) {
+              SERVICE.suite_ticket = ticketData;
+            }
+          }
+          if (infoType === "create_auth") {
+            const authCode = messageJson?.xml?.AuthCode;
+            if (authCode) {
+              SERVICE.authCode = authCode;
+            }
+          }
         }
       }
     }

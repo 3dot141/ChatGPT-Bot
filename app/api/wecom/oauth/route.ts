@@ -1,57 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
-import { SERVICE, WeCom_API } from "@/app/api/wecom/common";
+import { SERVICE, WeCom_API, WeComResult } from "@/app/api/wecom/common";
 
 export const dynamic = "force-dynamic";
 
-type QyResult = {
-  errcode: number;
-  errmsg: string;
-};
-
-type AccessThirdTokenResult = QyResult & {
-  suite_access_token: string;
-};
-
-type UserIdResult = QyResult & {
+type UserIdResult = WeComResult & {
   userid: string;
   user_ticket: string;
 };
 
-async function getThirdAccessToken(
-  suite_id: string,
-  suite_secret: string,
-  suite_ticket: string,
+async function getUserName(
+  suiteAccessToken: string,
+  code: string,
 ): Promise<string> {
-  const url = `https://qyapi.weixin.qq.com/cgi-bin/service/get_suite_token`;
-  const body = {
-    suite_id,
-    suite_secret,
-    suite_ticket,
-  };
-
-  const result = await fetch(url, {
-    method: "POST",
-    body: JSON.stringify(body),
-  });
-  const json = (await result.json()) as AccessThirdTokenResult;
-  if (json.errcode) {
-    throw new Error(json.errmsg);
-  }
-  return json.suite_access_token;
-}
-
-async function getUserName(accessToken: string, code: string): Promise<string> {
-  const userIdUrl = `https://qyapi.weixin.qq.com/cgi-bin/service/auth/getuserinfo3rd?suite_access_token=${accessToken}&code=${code}`;
+  const userIdUrl = `https://qyapi.weixin.qq.com/cgi-bin/service/auth/getuserinfo3rd?suite_access_token=${suiteAccessToken}&code=${code}`;
   const headers = new Headers();
 
   const userIdResponse = await fetch(userIdUrl, {
     headers,
   });
 
-  const userIdResult = (await userIdResponse.json()) as UserIdResult;
+  const userIdJSON = await userIdResponse.json();
+  const userIdResult = userIdJSON as UserIdResult;
   if (userIdResult.errcode !== 0) {
     throw new Error(userIdResult.errmsg);
   }
+
+  const accessToken =
+    "m_s23VPlzV-EQiECOMTOZm6mlXIhygh_jPenl2FuvBj1txxgO5rcI1zExQ6wwTKPUZQrbADR4UdtiBraVoDT14kW7t-xPBdyU-WpmTlvBe7WCUE81HwEkKXobiu-bLi2rVWxr4ja7_uhx_6J_YHSlgaWnD8-26lKjNkFmUpa4lZy8mzTkEPfyKMKzU34US9-VjVqBVQSwGSqVhEw1PXukQ";
+  const userInfoUrl = `https://qyapi.weixin.qq.com/cgi-bin/user/get?access_token=${accessToken}&userid=${userIdResult.userid}`;
+  const userInfoResult = await fetch(userInfoUrl);
+  const userInfoJSON = await userInfoResult.json();
   return userIdResult.userid;
 }
 
@@ -60,12 +38,10 @@ export async function GET(req: NextRequest) {
     const params = req.nextUrl.searchParams;
     const code = params.get("code") as string;
     const state = params.get("state") as string;
-    const accessToken = await getThirdAccessToken(
-      SERVICE.suite_id,
-      SERVICE.suite_secret,
-      SERVICE.suite_ticket,
-    );
-    const userName = await getUserName(accessToken, code);
+    const suiteAccessToken = await SERVICE.getSuiteAccessToken();
+
+    console.log(`accessToken is ${suiteAccessToken}`);
+    const userName = await getUserName(suiteAccessToken, code);
 
     console.error(`next url is ${req.nextUrl}`);
 

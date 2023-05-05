@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 declare global {
   type WeComAPI = {
     corpId: string;

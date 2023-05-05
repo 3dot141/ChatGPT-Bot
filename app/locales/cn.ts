@@ -3,7 +3,8 @@ import { SubmitKey } from "../store/app";
 const cn = {
   WIP: "该功能仍在开发中……",
   Error: {
-    NoAccess: "现在是未授权状态，请点击左下角设置按钮输入访问密码。",
+    NoAccess:
+      "现在是未授权状态，请点击左下角设置按钮输入访问密码。访问密码绑定信息，不建议提供给他人使用，可联系 Harrison 获取",
     NoQyLogin: "企业微信未授权，请点击左下角设置按钮进行企业微信授权。",
   },
   ChatItem: {

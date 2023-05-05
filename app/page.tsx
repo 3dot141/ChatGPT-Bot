@@ -4,13 +4,13 @@ import { Home } from "./components/home";
 
 import { getServerSideConfig } from "./config/server";
 
-const serverConfig = getServerSideConfig();
+const serverSideConfigPromise = getServerSideConfig();
 
 export default async function App() {
   return (
     <>
       <Home />
-      {serverConfig?.isVercel && <Analytics />}
+      {(await serverSideConfigPromise)?.isVercel && <Analytics />}
     </>
   );
 }

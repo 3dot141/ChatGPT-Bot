@@ -6,18 +6,19 @@ export const config = {
   matcher: ["/api/openai", "/api/chat-stream"],
 };
 
-const serverConfig = getServerSideConfig();
+const serverSideConfigPromise = getServerSideConfig();
 
-export function middleware(req: NextRequest) {
-  const accessCode = req.headers.get("access-code");
+export async function middleware(req: NextRequest) {
+
+  const serverConfig = await serverSideConfigPromise;
+
+  const accessCode = req.headers.get("access-code") ?? '';
   const token = req.headers.get("token");
-  const hashedCode = md5.hash(accessCode ?? "").trim();
 
-  console.log("[Auth] allowed hashed codes: ", [...serverConfig.codes]);
+  console.log("[Auth] allowed codes: ", [...serverConfig.codes]);
   console.log("[Auth] got access code:", accessCode);
-  console.log("[Auth] hashed access code:", hashedCode);
 
-  if (serverConfig.needCode && !serverConfig.codes.has(hashedCode) && !token) {
+  if (serverConfig.needCode && !serverConfig.codes.has(accessCode) && !token) {
     return NextResponse.json(
       {
         error: true,

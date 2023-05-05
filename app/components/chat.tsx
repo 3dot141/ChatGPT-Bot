@@ -802,8 +802,25 @@ export function Chat(props: {
                           if (e.type === 0) {
                             return (
                               <li key={e.title}>
-                                <a href={e.link} target="_blank">
-                                  {e.title}{" "}
+                                <a
+                                  href={"#"}
+                                  onClick={() =>
+                                    showModal({
+                                      title: e.title ?? "来源",
+                                      children: (
+                                        <div className="markdown-body">
+                                          <pre
+                                            className={styles["export-content"]}
+                                          >
+                                            {e.content}
+                                          </pre>
+                                        </div>
+                                      ),
+                                      onClose: () => setShowPromptModal(false),
+                                    })
+                                  }
+                                >
+                                  {e.title}
                                 </a>
                               </li>
                             );

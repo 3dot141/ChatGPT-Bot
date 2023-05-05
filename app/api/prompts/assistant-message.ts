@@ -27,6 +27,9 @@ export class AssistantMessage implements MessageMaker {
     for (let document of documents) {
       const content = document.content;
       const splits = content.split(">>");
+      // 截断一下，不要太长
+      const questions = splits[1].split(";");
+      document.title = questions.splice(0, 3).join(";");
       document.content = splits[2];
     }
     return documents;
@@ -56,7 +59,7 @@ export class AssistantMessage implements MessageMaker {
 
         sources.push({
           type: MessageSourceType.TEXT,
-          title: `问答${i}`,
+          title: document.title,
           content: content,
         });
 

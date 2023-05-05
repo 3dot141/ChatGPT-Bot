@@ -30,7 +30,7 @@ export class AccessCodeClient {
     return this.codes;
   }
 
-  private async updateCodes(): Promise<void> {
+  async updateCodes(): Promise<void> {
     this.needUpdate = true;
   }
 

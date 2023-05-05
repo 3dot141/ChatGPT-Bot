@@ -14,13 +14,6 @@ import { isMobileScreen, trimTopic } from "../utils";
 import Locale from "../locales";
 import { showToast } from "../components/ui-lib";
 
-export type Message = ChatCompletionResponseMessage & {
-  date: string;
-  streaming?: boolean;
-  isError?: boolean;
-  id?: number;
-};
-
 export function createMessage(override: Partial<Message>): Message {
   return {
     id: Date.now(),

@@ -25,7 +25,6 @@ import UnlikeIcon from "../icons/unlike.svg";
 import {
   BOT_HELLO,
   createMessage,
-  Message,
   ROLES,
   SubmitKey,
   Theme,

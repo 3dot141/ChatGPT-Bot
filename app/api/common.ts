@@ -1,10 +1,32 @@
 import { NextRequest } from "next/server";
+import { ChatCompletionResponseMessage } from "openai";
 
 const OPENAI_URL = "api.openai.com";
 const DEFAULT_PROTOCOL = "https";
 const PROTOCOL = process.env.PROTOCOL ?? DEFAULT_PROTOCOL;
 const BASE_URL = process.env.BASE_URL ?? OPENAI_URL;
 const OPENAI_KEY = process.env.OPENAI_API_KEY;
+
+declare global {
+  type MessageSource = {
+    content: string;
+    title: string;
+    link: string;
+    type: number;
+  };
+
+  type MessageContext = {
+    sources: MessageSource[];
+  };
+
+  type Message = ChatCompletionResponseMessage & {
+    date: string;
+    context?: MessageContext;
+    streaming?: boolean;
+    isError?: boolean;
+    id?: number;
+  };
+}
 
 export type CustomRequest = {
   headers: Headers;

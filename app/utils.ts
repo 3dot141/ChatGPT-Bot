@@ -1,7 +1,6 @@
 import { EmojiStyle } from "emoji-picker-react";
 import { showToast } from "./components/ui-lib";
 import Locale from "./locales";
-import { Message } from "@/app/store";
 import { requestAnalysisLike } from "@/app/requests";
 
 export function trimTopic(topic: string) {

@@ -1,12 +1,9 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-
-import { type ChatCompletionResponseMessage } from "openai";
 import {
   ControllerPool,
   requestAnalysis,
   requestChatStream,
-  requestChatStreamV2,
   requestWithPrompt,
 } from "../requests";
 import { isMobileScreen, trimTopic } from "../utils";
@@ -416,6 +413,11 @@ export const useChatStore = create<ChatStore>()(
               botMessage.content = content;
               set(() => ({}));
             }
+          },
+          // 将上下文放到这里
+          onContext(context) {
+            botMessage.context = JSON.parse(context) as MessageContext;
+            set(() => ({}));
           },
           onError(error, statusCode) {
             if (statusCode === 401) {

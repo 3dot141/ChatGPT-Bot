@@ -9,9 +9,9 @@ const OPENAI_KEY = process.env.OPENAI_API_KEY;
 
 declare global {
   type MessageSource = {
-    content: string;
-    title: string;
-    link: string;
+    content?: string;
+    title?: string;
+    link?: string;
     type: number;
   };
 
@@ -26,6 +26,16 @@ declare global {
     isError?: boolean;
     id?: number;
   };
+}
+
+export enum MessageSourceType {
+  TEXT = 0,
+  LINK = 1,
+}
+
+export enum MessageSign {
+  CONTENT_SIGN = "#c1:",
+  CONTEXT_SIGN = "#c2:",
 }
 
 export type CustomRequest = {

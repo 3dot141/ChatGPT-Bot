@@ -1,16 +1,22 @@
 import { createParser } from "eventsource-parser";
 import { NextRequest } from "next/server";
-import { doRequestOpenai } from "../common";
-import {
-  ChatFocusError,
-  preHandleMessage,
-} from "@/app/api/prompts/chat-message";
+import { doRequestOpenai, MessageSign } from "../common";
+import { preHandleMessage } from "@/app/api/prompts/chat-message";
 import { CreateChatCompletionRequest } from "openai/api";
 import { Request } from "node-fetch";
 
-async function createStream(res: Response) {
+export type ChatCustomRequest = CreateChatCompletionRequest & {
+  context?: MessageContext;
+};
+
+async function createStream(res: Response, context?: MessageContext) {
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
+
+  let count = 0;
+
+  const contentSign = encoder.encode(MessageSign.CONTENT_SIGN);
+  const contextSign = encoder.encode(MessageSign.CONTEXT_SIGN);
 
   const contentType = res.headers.get("Content-Type") ?? "";
   if (!contentType.includes("stream")) {
@@ -28,14 +34,27 @@ async function createStream(res: Response) {
           const data = event.data;
           // https://beta.openai.com/docs/api-reference/completions/create#completions/create-stream
           if (data === "[DONE]") {
+            if (context) {
+              controller.enqueue(contextSign);
+              const contextStr = JSON.stringify(context);
+              const queue = encoder.encode(`${contextStr}`);
+              controller.enqueue(queue);
+            }
             controller.close();
             return;
           }
           try {
+            // 处理第一次
+            if (count++ === 0) {
+              controller.enqueue(contentSign);
+            }
+
             const json = JSON.parse(data);
             const text = json.choices[0].delta.content;
-            const queue = encoder.encode(text);
-            controller.enqueue(queue);
+            if (text) {
+              const queue = encoder.encode(`${text}`);
+              controller.enqueue(queue);
+            }
           } catch (e) {
             controller.error(e);
           }
@@ -70,26 +89,24 @@ export async function POST(req: NextRequest) {
 
     const completionReq = (await body) as CreateChatCompletionRequest;
 
-    const chatCompletionRequest = await preHandleMessage(
+    const chatCustomRequest = await preHandleMessage(
       apiKey ?? "",
       completionReq,
     );
+    // 对象解构
+    const { context, ...chatCompletionRequest } = chatCustomRequest;
+
     const res = await doRequestOpenai({
       headers: req.headers,
       method: req.method,
       body: JSON.stringify(chatCompletionRequest),
     });
 
-    const stream = await createStream(res);
+    const stream = await createStream(res, chatCustomRequest.context);
     return new Response(stream);
   } catch (error) {
     console.error("[Chat Stream]", error);
     let errorMsg: string;
-    if (error instanceof ChatFocusError) {
-      return new Response("", {
-        status: 500,
-      });
-    }
     if (error instanceof Error) {
       const serializedError = {
         message: error.message,

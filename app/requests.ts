@@ -3,6 +3,11 @@ import { ModelConfig, SessionMsg, useAccessStore, useChatStore } from "./store";
 import { showToast } from "./components/ui-lib";
 import { json } from "stream/consumers";
 
+export enum MessageSign {
+  CONTENT_SIGN = "#c1:",
+  CONTEXT_SIGN = "#c2:",
+}
+
 const TIME_OUT_MS = 30000;
 
 const makeRequestParam = (
@@ -188,6 +193,7 @@ export async function requestChatStream(
     onMessage: (message: string, done: boolean) => void;
     onError: (error: Error, statusCode?: number) => void;
     onController?: (controller: AbortController) => void;
+    onContext?: (context: string) => void;
   },
 ) {
   const req = makeRequestParam(messages, {
@@ -226,6 +232,7 @@ export async function requestChatStream(
 
       options?.onController?.(controller);
 
+      let type = -1;
       while (true) {
         // handle time out, will stop if no response in 10 secs
         const resTimeoutId = setTimeout(() => finish(), TIME_OUT_MS);
@@ -236,12 +243,32 @@ export async function requestChatStream(
           break;
         }
 
-        const text = decoder.decode(content.value, { stream: true });
-        responseText += text;
+        let text = decoder.decode(content.value, { stream: true });
+
+        if (text.startsWith(MessageSign.CONTENT_SIGN)) {
+          const length = MessageSign.CONTENT_SIGN.length;
+          text = text.slice(length);
+          type = 0;
+        }
+
+        if (text.startsWith(MessageSign.CONTEXT_SIGN)) {
+          debugger;
+          const length = MessageSign.CONTEXT_SIGN.length;
+          text = text.slice(length);
+          type = 1;
+        }
+
+        if (type === 0) {
+          responseText += text;
+          options?.onMessage(responseText, false);
+        }
+
+        if (type === 1) {
+          debugger;
+          options?.onContext?.(text);
+        }
 
         const done = content.done;
-        options?.onMessage(responseText, false);
-
         if (done) {
           break;
         }

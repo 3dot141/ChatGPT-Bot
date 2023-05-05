@@ -780,6 +780,39 @@ export function Chat(props: {
                     fontSize={fontSize}
                     parentRef={scrollRef}
                   />
+                  {message.context && (
+                    <div>
+                      <hr />
+                      <span>
+                        <strong>SOURCES:</strong>
+                      </span>
+                      <ul>
+                        {message.context.sources.map((e) => {
+                          // link
+                          if (e.type === 1) {
+                            return (
+                              <li key={e.title}>
+                                <a href={e.link} target="_blank">
+                                  {e.title}{" "}
+                                </a>
+                              </li>
+                            );
+                          }
+                          // content
+                          if (e.type === 0) {
+                            return (
+                              <li key={e.title}>
+                                <a href={e.link} target="_blank">
+                                  {e.title}{" "}
+                                </a>
+                              </li>
+                            );
+                          }
+                          return "";
+                        })}
+                      </ul>
+                    </div>
+                  )}
                 </div>
                 {!isUser && !message.preview && (
                   <div className={styles["chat-message-actions"]}>

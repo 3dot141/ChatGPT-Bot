@@ -6,12 +6,14 @@ import { CreateChatCompletionRequest } from "openai/api";
 import { HelperMessage } from "@/app/api/prompts/helper-message";
 import { QuestionMessage } from "@/app/api/prompts/question-message";
 import { AssistantMessage } from "@/app/api/prompts/assistant-message";
+import { ChatCustomRequest } from "@/app/api/chat-stream/route";
 
 export type Message = ChatCompletionResponseMessage;
 
 export type SessionMsg = {
   userMessage: Message;
   recentMessages: Message[];
+  context?: MessageContext;
 };
 
 export enum QueryType {
@@ -26,6 +28,8 @@ export type MessageChain = {
   userContent: string;
   assistantContent: string;
   queryMessage: Message;
+
+  context?: MessageContext;
 };
 
 export interface MessageMaker {
@@ -38,7 +42,7 @@ async function makeFrMsgChain(
   content: string,
   recentMessages: Message[],
   messageMaker: MessageMaker,
-) {
+): Promise<SessionMsg> {
   // OpenAI recommends replacing newlines with spaces for best results
   const query = content.replace(/\n/g, " ");
   // console.log("input: ", input);
@@ -54,8 +58,13 @@ async function makeFrMsgChain(
 
   const documents = await messageMaker.queryDocuments(embedding);
 
-  const { systemContent, userContent, assistantContent, queryMessage } =
-    messageMaker.parseDoc2MessageChain(documents, query);
+  const {
+    systemContent,
+    userContent,
+    assistantContent,
+    queryMessage,
+    context,
+  } = messageMaker.parseDoc2MessageChain(documents, query);
 
   const recentMsgList: Message[] = [
     ...recentMessages,
@@ -74,7 +83,7 @@ async function makeFrMsgChain(
   ];
 
   console.log("messages: ", queryMessage);
-  return { userMessage: queryMessage, recentMessages: recentMsgList };
+  return { userMessage: queryMessage, recentMessages: recentMsgList, context };
 }
 
 /**
@@ -125,11 +134,10 @@ async function makeChatMessages(
   return { userMessage: userMessage, recentMessages: recentMessages };
 }
 
-export class ChatFocusError extends Error {}
 export async function preHandleMessage(
   apiKey: string,
   completionReq: CreateChatCompletionRequest,
-): Promise<CreateChatCompletionRequest> {
+): Promise<ChatCustomRequest> {
   try {
     const messages = completionReq.messages;
     const sessionMsg: SessionMsg = {
@@ -144,6 +152,7 @@ export async function preHandleMessage(
     return {
       ...completionReq,
       messages: [...chatMessage.recentMessages, chatMessage.userMessage],
+      context: chatMessage.context,
     };
   } catch (e) {
     throw e;

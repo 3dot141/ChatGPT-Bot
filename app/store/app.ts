@@ -222,11 +222,14 @@ interface ChatStore {
     userMessage: Message,
     callback?: (botMessage: Message) => void,
   ) => Promise<void>;
-  doGoalChat: (
-    task: Task,
-    recentMessages: Message[],
-    taskStrategy: TaskStrategy,
-  ) => Promise<void>;
+  /**
+   * 执行目标
+   * 没有上下文记忆功能
+   *
+   * @param task 任务
+   * @param taskStrategy 任务策略
+   */
+  doGoalChat: (task: Task, taskStrategy: TaskStrategy) => Promise<void>;
   summarizeSession: () => void;
   updateStat: (message: Message) => void;
   updateCurrentSession: (updater: (session: ChatSession) => void) => void;
@@ -393,11 +396,7 @@ export const useChatStore = create<ChatStore>()(
         get().summarizeSession();
       },
 
-      async doGoalChat(
-        task: Task,
-        recentMessages: Message[],
-        taskStrategy: TaskStrategy,
-      ) {
+      async doGoalChat(task: Task, taskStrategy: TaskStrategy) {
         // 获取纯粹的问题
         const query = task.query.slice(task.title.length)?.trim();
         const tasks: Task[] = [
@@ -411,17 +410,17 @@ export const useChatStore = create<ChatStore>()(
         ];
         for (let task of tasks) {
           const prompt = SearchService.get(task.title);
+          const thinkingMessage = createMessage({
+            role: "assistant",
+            content: `正在借助 "${(prompt
+              ? prompt.content
+              : task.title
+            ).trim()}" 思考问题 "${query.trim()}" `,
+            context: { cot_thinking: true },
+          });
+
           get().updateCurrentSession((session) => {
-            session.messages.push(
-              createMessage({
-                role: "assistant",
-                content: `正在借助 "${(prompt
-                  ? prompt.content
-                  : task.title
-                ).trim()}" 思考问题 "${query.trim()}" `,
-                context: { cot_thinking: true },
-              }),
-            );
+            session.messages.push(thinkingMessage);
           });
           const userMessage: Message = createMessage({
             role: "user",
@@ -430,22 +429,19 @@ export const useChatStore = create<ChatStore>()(
           });
 
           const result = await new Promise<TaskResult>((resolve) => {
-            get().onAssistantOutput(
-              recentMessages,
-              userMessage,
-              (botMessage: Message) => {
-                // 查询失败的反馈
-                if (
-                  botMessage &&
-                  botMessage.content.startsWith("对不起，我不知道如何帮助你")
-                ) {
-                  botMessage.isError = true;
-                  resolve(TaskResult.FAILED);
-                } else {
-                  resolve(TaskResult.SUCCESS);
-                }
-              },
-            );
+            get().onAssistantOutput([], userMessage, (botMessage: Message) => {
+              // 查询失败的反馈
+              if (
+                botMessage &&
+                botMessage.content.startsWith("对不起，我不知道如何帮助你")
+              ) {
+                thinkingMessage.isError = true;
+                botMessage.isError = true;
+                resolve(TaskResult.FAILED);
+              } else {
+                resolve(TaskResult.SUCCESS);
+              }
+            });
           });
 
           if (result === TaskResult.SUCCESS) {
@@ -544,7 +540,6 @@ export const useChatStore = create<ChatStore>()(
         if (content?.startsWith("fr-goal-chain")) {
           await this.doGoalChat(
             { title: "fr-goal-chain", query: content },
-            recentMessages,
             TaskStrategy.CHAIN,
           );
           return;
@@ -552,7 +547,6 @@ export const useChatStore = create<ChatStore>()(
         if (content?.startsWith("fr-goal-all")) {
           await this.doGoalChat(
             { title: "fr-goal-all", query: content },
-            recentMessages,
             TaskStrategy.ALL,
           );
           return;

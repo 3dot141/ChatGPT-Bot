@@ -20,7 +20,7 @@ declare global {
   };
 
   type Message = ChatCompletionResponseMessage & {
-    date: string;
+    date?: string;
     context?: MessageContext;
     streaming?: boolean;
     isError?: boolean;

@@ -2,7 +2,6 @@ import {
   MessageChain,
   Document,
   MessageMaker,
-  Message,
 } from "@/app/api/prompts/chat-message";
 import GPT3Tokenizer from "gpt3-tokenizer";
 import { supabaseClient } from "@/app/lib/embeddings-supabase";

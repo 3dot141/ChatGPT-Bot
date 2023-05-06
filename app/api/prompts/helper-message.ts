@@ -1,6 +1,5 @@
 import {
   Document,
-  Message,
   MessageChain,
   MessageMaker,
   QueryType,

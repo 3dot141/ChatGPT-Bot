@@ -8,8 +8,6 @@ import { QuestionMessage } from "@/app/api/prompts/question-message";
 import { AssistantMessage } from "@/app/api/prompts/assistant-message";
 import { ChatCustomRequest } from "@/app/api/chat-stream/route";
 
-export type Message = ChatCompletionResponseMessage;
-
 export type SessionMsg = {
   userMessage: Message;
   recentMessages: Message[];

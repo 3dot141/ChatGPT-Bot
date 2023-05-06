@@ -252,7 +252,6 @@ export async function requestChatStream(
         }
 
         if (text.startsWith(MessageSign.CONTEXT_SIGN)) {
-          debugger;
           const length = MessageSign.CONTEXT_SIGN.length;
           text = text.slice(length);
           type = 1;
@@ -264,7 +263,6 @@ export async function requestChatStream(
         }
 
         if (type === 1) {
-          debugger;
           options?.onContext?.(text);
         }
 

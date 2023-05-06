@@ -34,7 +34,10 @@ export class AssistantMessage implements MessageMaker {
     return documents;
   }
 
-  parseDoc2MessageChain(documents: Document[], query: string): MessageChain {
+  parseDoc2MessageChain(
+    documents: Document[],
+    userMessage: Message,
+  ): MessageChain {
     const tokenizer = new GPT3Tokenizer({ type: "gpt3" });
     let tokenCount = 0;
     let contextText = "";
@@ -96,7 +99,7 @@ export class AssistantMessage implements MessageMaker {
   ${contextText}
   
   USER QUESTION: 
-  在FineReport中，${query}
+  在FineReport中，${userMessage.content}
   `,
     };
     return {

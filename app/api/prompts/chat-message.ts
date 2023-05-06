@@ -1,6 +1,3 @@
-import { ChatCompletionResponseMessage } from "openai";
-import { supabaseClient } from "@/app/lib/embeddings-supabase";
-import GPT3Tokenizer from "gpt3-tokenizer";
 import { requestEmbedding } from "@/app/api/common";
 import { CreateChatCompletionRequest } from "openai/api";
 import { HelperMessage } from "@/app/api/prompts/helper-message";
@@ -33,19 +30,22 @@ export type MessageChain = {
 export interface MessageMaker {
   queryDocuments(embedding: []): Promise<Document[]>;
 
-  parseDoc2MessageChain(documents: Document[], query: string): MessageChain;
+  parseDoc2MessageChain(
+    documents: Document[],
+    userMessage: Message,
+  ): MessageChain;
 }
 async function makeFrMsgChain(
   apiKey: string,
-  content: string,
+  userMessage: Message,
+  // content: string,
   recentMessages: Message[],
   messageMaker: MessageMaker,
 ): Promise<SessionMsg> {
   // OpenAI recommends replacing newlines with spaces for best results
-  const query = content.replace(/\n/g, " ");
-  // console.log("input: ", input);
+  userMessage.content = userMessage.content.replace(/\n/g, " ");
 
-  const embeddingResponse = await requestEmbedding(apiKey, query);
+  const embeddingResponse = await requestEmbedding(apiKey, userMessage.content);
 
   const embeddingData = await embeddingResponse.json();
   if (embeddingData.error) {
@@ -62,7 +62,7 @@ async function makeFrMsgChain(
     assistantContent,
     queryMessage,
     context,
-  } = messageMaker.parseDoc2MessageChain(documents, query);
+  } = messageMaker.parseDoc2MessageChain(documents, userMessage);
 
   const recentMsgList: Message[] = [
     ...recentMessages,
@@ -101,18 +101,24 @@ async function makeChatMessages(
   const splits = content.split(" ");
   if (splits && splits.length !== 0) {
     const promptKey = splits[0].toLowerCase();
-    const input = splits.slice(1).join(" ");
+    userMessage.content = splits.slice(1).join(" ");
+
     if ("fr" === promptKey) {
       const helperMessage = new HelperMessage();
       // @ts-ignore
-      return await makeFrMsgChain(apiKey, input, recentMessages, helperMessage);
+      return await makeFrMsgChain(
+        apiKey,
+        userMessage,
+        recentMessages,
+        helperMessage,
+      );
     }
     if ("fr-que" === promptKey) {
       const questionMessage = new QuestionMessage();
       // @ts-ignore
       return await makeFrMsgChain(
         apiKey,
-        input,
+        userMessage,
         recentMessages,
         questionMessage,
       );
@@ -122,7 +128,7 @@ async function makeChatMessages(
       // @ts-ignore
       return await makeFrMsgChain(
         apiKey,
-        input,
+        userMessage,
         recentMessages,
         assistantMessage,
       );

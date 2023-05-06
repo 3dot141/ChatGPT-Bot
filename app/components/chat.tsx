@@ -579,19 +579,19 @@ export function Chat(props: {
   // preview messages
   const messages = context
     .concat(session.messages as RenderMessage[])
-    .concat(
-      isLoading
-        ? [
-            {
-              ...createMessage({
-                role: "assistant",
-                content: "……",
-              }),
-              preview: true,
-            },
-          ]
-        : [],
-    )
+    // .concat(
+    //   isLoading
+    //     ? [
+    //         {
+    //           ...createMessage({
+    //             role: "assistant",
+    //             content: "……",
+    //           }),
+    //           preview: true,
+    //         },
+    //       ]
+    //     : [],
+    // )
     .concat(
       userInput.length > 0 && config.sendPreviewBubble
         ? [
@@ -780,14 +780,14 @@ export function Chat(props: {
                     fontSize={fontSize}
                     parentRef={scrollRef}
                   />
-                  {message.context && (
+                  {message.context?.sources && (
                     <div>
                       <hr />
                       <span>
                         <strong>SOURCES:</strong>
                       </span>
                       <ul>
-                        {message.context.sources.map((e) => {
+                        {message.context.sources?.map((e) => {
                           // link
                           if (e.type === 1) {
                             return (
@@ -834,7 +834,7 @@ export function Chat(props: {
                 {!isUser && !message.preview && (
                   <div className={styles["chat-message-actions"]}>
                     <div className={styles["chat-message-action-date"]}>
-                      {message.date.toLocaleString()}
+                      {message.date?.toLocaleString()}
                     </div>
                   </div>
                 )}

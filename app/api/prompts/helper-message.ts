@@ -78,7 +78,7 @@ export class HelperMessage implements MessageMaker {
   当给你 CONTEXT 时，你只用这些信息来回答问题。
   你以 markdown 的形式输出。如果有代码片段，那么就输出为代码格式。
   如果有多个步骤或者需要说明多个信息，就用 1- 2- 3- 这样的形式输出。
-  如果你不确定且答案没有明确写在提供的CONTEXT中，你就说:"对不起，我不知道如何帮助你。" 
+  如果你不确定回答，且答案没有明确写在提供的 CONTEXT 中，你就在回答开头说:"对不起，我不知道如何帮助你。" 
   注意，不要输出null, 不要编造URL`;
 
     const userContent = `CONTEXT:

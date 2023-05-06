@@ -16,7 +16,16 @@ declare global {
   };
 
   type MessageContext = {
-    sources: MessageSource[];
+    sources?: MessageSource[];
+
+    /**
+     * 思维链
+     * - thinking
+     * - question
+     * - answer
+     */
+    cot_thinking?: boolean;
+    cot_question?: boolean;
   };
 
   type Message = ChatCompletionResponseMessage & {

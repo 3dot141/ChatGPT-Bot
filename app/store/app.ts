@@ -10,6 +10,8 @@ import { isMobileScreen, trimTopic } from "../utils";
 
 import Locale from "../locales";
 import { showToast } from "../components/ui-lib";
+import { SearchService } from "@/app/store/prompt";
+import { Task, TaskResult, TaskStrategy } from "@/app/gpt";
 
 export function createMessage(override: Partial<Message>): Message {
   return {
@@ -208,6 +210,23 @@ interface ChatStore {
   currentSession: () => ChatSession;
   onNewMessage: (message: Message) => void;
   onUserInput: (content: string) => Promise<void>;
+  /**
+   * 创建助手的应答
+   *
+   * @param recentMessages 最近消息
+   * @param userMessage 用户消息
+   * @param callback 回调函数
+   */
+  onAssistantOutput: (
+    recentMessages: Message[],
+    userMessage: Message,
+    callback?: (botMessage: Message) => void,
+  ) => Promise<void>;
+  doGoalChat: (
+    task: Task,
+    recentMessages: Message[],
+    taskStrategy: TaskStrategy,
+  ) => Promise<void>;
   summarizeSession: () => void;
   updateStat: (message: Message) => void;
   updateCurrentSession: (updater: (session: ChatSession) => void) => void;
@@ -374,30 +393,90 @@ export const useChatStore = create<ChatStore>()(
         get().summarizeSession();
       },
 
-      async onUserInput(content) {
-        const userMessage: Message = createMessage({
-          role: "user",
-          content,
-        });
+      async doGoalChat(
+        task: Task,
+        recentMessages: Message[],
+        taskStrategy: TaskStrategy,
+      ) {
+        // 获取纯粹的问题
+        const query = task.query.slice(task.title.length)?.trim();
+        const tasks: Task[] = [
+          { title: "fr", query: `fr ${query}` },
+          {
+            title: "fr-que",
+            query: `fr-que ${query}`,
+          },
+          { title: "fr-front", query: `fr-front ${query}` },
+          { title: "gpt", query },
+        ];
+        for (let task of tasks) {
+          const prompt = SearchService.get(task.title);
+          get().updateCurrentSession((session) => {
+            session.messages.push(
+              createMessage({
+                role: "assistant",
+                content: `正在借助 "${(prompt
+                  ? prompt.content
+                  : task.title
+                ).trim()}" 思考问题 "${query.trim()}" `,
+                context: { cot_thinking: true },
+              }),
+            );
+          });
+          const userMessage: Message = createMessage({
+            role: "user",
+            content: task.query,
+            context: { cot_question: true },
+          });
 
+          const result = await new Promise<TaskResult>((resolve) => {
+            get().onAssistantOutput(
+              recentMessages,
+              userMessage,
+              (botMessage: Message) => {
+                // 查询失败的反馈
+                if (
+                  botMessage &&
+                  botMessage.content.startsWith("对不起，我不知道如何帮助你")
+                ) {
+                  get().updateCurrentSession((session) => {
+                    session.messages.pop();
+                  });
+                  resolve(TaskResult.FAILED);
+                } else {
+                  resolve(TaskResult.SUCCESS);
+                }
+              },
+            );
+          });
+
+          if (result === TaskResult.SUCCESS) {
+            if (taskStrategy == TaskStrategy.CHAIN) {
+              break;
+            }
+          }
+        }
+      },
+
+      async onAssistantOutput(
+        recentMessages: Message[],
+        userMessage: Message,
+        callback?: (botMessage: Message) => void,
+      ): Promise<void> {
         const botMessage: Message = createMessage({
           role: "assistant",
           streaming: true,
         });
 
-        // get recent messages
-        const recentMessages = get().getMessagesWithMemory();
+        get().updateCurrentSession((session) => {
+          session.messages.push(botMessage);
+        });
+
         const sendMessages = recentMessages.concat(userMessage);
         const sessionIndex = get().currentSessionIndex;
         const messageIndex = get().currentSession().messages.length + 1;
 
-        // save user's and bot's message
-        get().updateCurrentSession((session) => {
-          session.messages.push(userMessage);
-          session.messages.push(botMessage);
-        });
-
-        requestChatStream(sendMessages, {
+        await requestChatStream(sendMessages, {
           onMessage(content, done) {
             // stream response
             if (done) {
@@ -408,6 +487,7 @@ export const useChatStore = create<ChatStore>()(
                 sessionIndex,
                 botMessage.id ?? messageIndex,
               );
+              callback && callback(botMessage);
               requestAnalysis(userMessage, botMessage);
             } else {
               botMessage.content = content;
@@ -449,6 +529,40 @@ export const useChatStore = create<ChatStore>()(
         });
       },
 
+      async onUserInput(content) {
+        const userMessage: Message = createMessage({
+          role: "user",
+          content,
+        });
+
+        // get recent messages
+        const recentMessages = get().getMessagesWithMemory();
+
+        // save user's and bot's message
+        get().updateCurrentSession((session) => {
+          session.messages.push(userMessage);
+        });
+
+        if (content?.startsWith("fr-goal-chain")) {
+          await this.doGoalChat(
+            { title: "fr-goal-chain", query: content },
+            recentMessages,
+            TaskStrategy.CHAIN,
+          );
+          return;
+        }
+        if (content?.startsWith("fr-goal-all")) {
+          await this.doGoalChat(
+            { title: "fr-goal-all", query: content },
+            recentMessages,
+            TaskStrategy.ALL,
+          );
+          return;
+        }
+
+        get().onAssistantOutput(recentMessages, userMessage);
+      },
+
       getMemoryPrompt() {
         const session = get().currentSession();
 
@@ -462,7 +576,13 @@ export const useChatStore = create<ChatStore>()(
       getMessagesWithMemory() {
         const session = get().currentSession();
         const config = get().config;
-        const messages = session.messages.filter((msg) => !msg.isError);
+        // 过滤错误/ cot-思考/问题
+        const messages = session.messages.filter(
+          (msg) =>
+            !msg.isError ||
+            !msg.context?.cot_thinking ||
+            !msg.context?.cot_question,
+        );
         const n = messages.length;
 
         const context = session.context.slice();

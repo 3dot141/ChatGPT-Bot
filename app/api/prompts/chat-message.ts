@@ -4,6 +4,7 @@ import { HelperMessage } from "@/app/api/prompts/helper-message";
 import { QuestionMessage } from "@/app/api/prompts/question-message";
 import { AssistantMessage } from "@/app/api/prompts/assistant-message";
 import { ChatCustomRequest } from "@/app/api/chat-stream/route";
+import { CommonCache } from "@/app/lib/common-cache";
 
 export type SessionMsg = {
   userMessage: Message;
@@ -35,6 +36,11 @@ export interface MessageMaker {
     userMessage: Message,
   ): MessageChain;
 }
+
+const embeddingCache = new CommonCache<string, any>();
+
+const docCache = new CommonCache<any, Document[]>();
+
 async function makeFrMsgChain(
   apiKey: string,
   userMessage: Message,
@@ -45,16 +51,21 @@ async function makeFrMsgChain(
   // OpenAI recommends replacing newlines with spaces for best results
   userMessage.content = userMessage.content.replace(/\n/g, " ");
 
-  const embeddingResponse = await requestEmbedding(apiKey, userMessage.content);
+  const cacheKey: string = userMessage.content;
+  let embedding = (await embeddingCache.getOrLoad(cacheKey, async () => {
+    const embeddingResponse = await requestEmbedding(apiKey, cacheKey);
+    const embeddingData = await embeddingResponse.json();
+    if (embeddingData.error) {
+      throw new Error(JSON.stringify(embeddingData.error));
+    }
+    const [{ embedding }] = embeddingData.data;
+    return embedding;
+  })) as any;
 
-  const embeddingData = await embeddingResponse.json();
-  if (embeddingData.error) {
-    throw new Error(JSON.stringify(embeddingData.error));
-  }
-  const [{ embedding }] = embeddingData.data;
-  // console.log("embedding: ", embedding);
-
-  const documents = await messageMaker.queryDocuments(embedding);
+  let documents =
+    (await docCache.getOrLoad(embedding, async () => {
+      return await messageMaker.queryDocuments(embedding);
+    })) ?? [];
 
   const {
     systemContent,

@@ -45,6 +45,11 @@ export const SearchService = {
     this.engine.add(prompt);
   },
 
+  get(title: string): Prompt | undefined {
+    const prompts = this.search(title);
+    return prompts.find((e) => e.title === title);
+  },
+
   search(text: string) {
     const results = this.engine.search(text);
     return results.map((v) => v.item);

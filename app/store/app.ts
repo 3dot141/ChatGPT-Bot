@@ -439,9 +439,7 @@ export const useChatStore = create<ChatStore>()(
                   botMessage &&
                   botMessage.content.startsWith("对不起，我不知道如何帮助你")
                 ) {
-                  get().updateCurrentSession((session) => {
-                    session.messages.pop();
-                  });
+                  botMessage.isError = true;
                   resolve(TaskResult.FAILED);
                 } else {
                   resolve(TaskResult.SUCCESS);

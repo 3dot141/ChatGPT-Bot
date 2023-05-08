@@ -248,6 +248,7 @@ export async function requestChatStream(
 
         let text = decoder.decode(content.value, { stream: true });
 
+        // 使用两个标准判断是否是 context, 从而帮助减少前端的判断请求
         if (
           type === MessageSign.CONTEXT_TYPE &&
           text.startsWith(MessageSign.CONTEXT_SIGN)

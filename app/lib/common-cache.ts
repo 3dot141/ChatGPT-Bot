@@ -1,5 +1,5 @@
 // hybrid module, either works
-import { BackgroundFetch, LRUCache } from "lru-cache";
+import { LRUCache } from "lru-cache";
 
 // At least one of 'max', 'ttl', or 'maxSize' is required, to prevent
 // unsafe unbounded storage.

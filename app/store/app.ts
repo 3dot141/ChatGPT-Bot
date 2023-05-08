@@ -431,10 +431,7 @@ export const useChatStore = create<ChatStore>()(
           const result = await new Promise<TaskResult>((resolve) => {
             get().onAssistantOutput([], userMessage, (botMessage: Message) => {
               // 查询失败的反馈
-              if (
-                botMessage &&
-                botMessage.content.startsWith("对不起，我不知道如何帮助你")
-              ) {
+              if (botMessage && botMessage.content.startsWith("对不起")) {
                 thinkingMessage.isError = true;
                 botMessage.isError = true;
                 resolve(TaskResult.FAILED);
@@ -490,8 +487,14 @@ export const useChatStore = create<ChatStore>()(
           },
           // 将上下文放到这里
           onContext(context) {
-            botMessage.context = JSON.parse(context) as MessageContext;
-            set(() => ({}));
+            try {
+              if (context) {
+                botMessage.context = JSON.parse(context) as MessageContext;
+                set(() => ({}));
+              }
+            } catch (e) {
+              console.error(`context is ${context}`, e);
+            }
           },
           onError(error, statusCode) {
             if (statusCode === 401) {

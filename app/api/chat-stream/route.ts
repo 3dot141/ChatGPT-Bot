@@ -25,7 +25,7 @@ async function createStream(res: Response, context?: MessageContext) {
   const stream = new ReadableStream({
     async start(controller) {
       let buffer: string = "";
-      let count = 0;
+      let count = 1;
 
       function onParse(event: any) {
         if (event.type === "event") {
@@ -62,7 +62,7 @@ async function createStream(res: Response, context?: MessageContext) {
       if (context) {
         const contextStr = JSON.stringify(context);
         const queue = encoder.encode(
-          `${MessageSign.CONTEXT_SIGN}${contextStr}`,
+          `${MessageSign.CONTEXT_SIGN}${contextStr}${MessageSign.CONTEXT_SIGN}`,
         );
         controller.enqueue(queue);
       }

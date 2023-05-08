@@ -251,14 +251,20 @@ export async function requestChatStream(
         // 使用两个标准判断是否是 context, 从而帮助减少前端的判断请求
         if (
           type === MessageSign.CONTEXT_TYPE &&
-          text.startsWith(MessageSign.CONTEXT_SIGN)
+          text?.startsWith(MessageSign.CONTEXT_SIGN)
         ) {
-          const length = MessageSign.CONTEXT_SIGN.length;
-          text = text.slice(length);
+          const contextSignLen = MessageSign.CONTEXT_SIGN.length;
+          const contextStart = contextSignLen;
+          const contextEnd = text.lastIndexOf(MessageSign.CONTEXT_SIGN);
+          text = text.slice(contextStart, contextEnd);
           options?.onContext?.(text);
+
+          // 给 message 准备的, 如果有的话。
+          const contentStart = contextEnd + contextSignLen;
+          text = text.slice(contentStart);
+
           // 立刻切换成其他类型
           type = MessageSign.CONTENT_TYPE;
-          continue;
         }
 
         // 默认就走这条路

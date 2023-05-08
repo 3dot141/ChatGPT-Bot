@@ -13,11 +13,6 @@ async function createStream(res: Response, context?: MessageContext) {
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
 
-  let count = 0;
-
-  const contentSign = encoder.encode(MessageSign.CONTENT_SIGN);
-  const contextSign = encoder.encode(MessageSign.CONTEXT_SIGN);
-
   const contentType = res.headers.get("Content-Type") ?? "";
   if (!contentType.includes("stream")) {
     const content = await (
@@ -29,36 +24,47 @@ async function createStream(res: Response, context?: MessageContext) {
 
   const stream = new ReadableStream({
     async start(controller) {
+      let buffer: string = "";
+      let count = 0;
+
       function onParse(event: any) {
         if (event.type === "event") {
           const data = event.data;
           // https://beta.openai.com/docs/api-reference/completions/create#completions/create-stream
           if (data === "[DONE]") {
-            if (context) {
-              controller.enqueue(contextSign);
-              const contextStr = JSON.stringify(context);
-              const queue = encoder.encode(`${contextStr}`);
-              controller.enqueue(queue);
-            }
+            // 先传递内容
+            const queue = encoder.encode(buffer);
+            controller.enqueue(queue);
+            buffer = "";
+
+            // 会话结束
             controller.close();
             return;
           }
           try {
-            // 处理第一次
-            if (count++ === 0) {
-              controller.enqueue(contentSign);
-            }
-
             const json = JSON.parse(data);
             const text = json.choices[0].delta.content;
             if (text) {
-              const queue = encoder.encode(`${text}`);
-              controller.enqueue(queue);
+              buffer += text;
+              // 5 次处理一次
+              if (count++ % 5 == 0) {
+                const queue = encoder.encode(buffer);
+                controller.enqueue(queue);
+                buffer = "";
+              }
             }
           } catch (e) {
             controller.error(e);
           }
         }
+      }
+
+      if (context) {
+        const contextStr = JSON.stringify(context);
+        const queue = encoder.encode(
+          `${MessageSign.CONTEXT_SIGN}${contextStr}`,
+        );
+        controller.enqueue(queue);
       }
 
       const parser = createParser(onParse);

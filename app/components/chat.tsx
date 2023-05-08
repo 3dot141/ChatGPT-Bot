@@ -780,7 +780,7 @@ export function Chat(props: {
                     fontSize={fontSize}
                     parentRef={scrollRef}
                   />
-                  {message.context?.sources && (
+                  {!message.streaming && message.context?.sources && (
                     <div>
                       <hr />
                       <span>

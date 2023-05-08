@@ -4,9 +4,8 @@ import { showToast } from "./components/ui-lib";
 import { json } from "stream/consumers";
 
 export enum MessageSign {
-  INVALID_KEY = -1,
-  CONTENT_KEY = 0,
-  CONTEXT_KEY = 1,
+  CONTENT_TYPE = 0,
+  CONTEXT_TYPE = 1,
 
   CONTENT_SIGN = "#c1:",
   CONTEXT_SIGN = "#c2:",
@@ -236,7 +235,7 @@ export async function requestChatStream(
 
       options?.onController?.(controller);
 
-      let type = MessageSign.INVALID_KEY;
+      let type = MessageSign.CONTEXT_TYPE;
       while (true) {
         // handle time out, will stop if no response in 10 secs
         const resTimeoutId = setTimeout(() => finish(), TIME_OUT_MS);
@@ -249,25 +248,21 @@ export async function requestChatStream(
 
         let text = decoder.decode(content.value, { stream: true });
 
-        if (text.startsWith(MessageSign.CONTENT_SIGN)) {
-          const length = MessageSign.CONTENT_SIGN.length;
-          text = text.slice(length);
-          type = MessageSign.CONTENT_KEY;
-        }
-
-        if (text.startsWith(MessageSign.CONTEXT_SIGN)) {
+        if (
+          type === MessageSign.CONTEXT_TYPE &&
+          text.startsWith(MessageSign.CONTEXT_SIGN)
+        ) {
           const length = MessageSign.CONTEXT_SIGN.length;
           text = text.slice(length);
-          type = MessageSign.CONTEXT_KEY;
+          options?.onContext?.(text);
+          // 立刻切换成其他类型
+          type = MessageSign.CONTENT_TYPE;
+          continue;
         }
 
-        if (type === MessageSign.CONTEXT_KEY) {
-          options?.onContext?.(text);
-        } else {
-          // 默认就走这条路
-          responseText += text;
-          options?.onMessage(responseText, false);
-        }
+        // 默认就走这条路
+        responseText += text;
+        options?.onMessage(responseText, false);
 
         const done = content.done;
         if (done) {

@@ -65,7 +65,7 @@ export class QuestionMessage implements MessageMaker {
         });
 
         contextText += `CONTENT: ${content.trim()}\n
-          TITLE: ${document.title} \n 
+          TITLE: ${title} \n 
           SOURCE: ${url}\n\n`;
       }
     }

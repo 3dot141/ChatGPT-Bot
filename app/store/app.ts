@@ -400,7 +400,7 @@ export const useChatStore = create<ChatStore>()(
         // 获取纯粹的问题
         const query = task.query.slice(task.title.length)?.trim();
         const tasks: Task[] = [
-          { title: "fr", query: `fr ${query}` },
+          { title: "fr-help", query: `fr-help ${query}` },
           {
             title: "fr-que",
             query: `fr-que ${query}`,
@@ -409,13 +409,11 @@ export const useChatStore = create<ChatStore>()(
           { title: "gpt", query: `please answer in chinese, ${query}` },
         ];
         for (let task of tasks) {
-          const prompt = SearchService.get(task.title);
+          const warning =
+            task.title === "gpt" ? "注意：GPT 可能会捏造信息, 请自行分辨" : "";
           const thinkingMessage = createMessage({
             role: "assistant",
-            content: `正在借助 "${(prompt
-              ? prompt.content
-              : task.title
-            ).trim()}" 思考问题 "${query.trim()}" `,
+            content: `正在借助 "${task.title.trim()}" 思考问题 "${query.trim()}" ${warning} `,
             context: { cot_thinking: true },
           });
 

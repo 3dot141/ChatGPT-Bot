@@ -114,7 +114,7 @@ async function makeChatMessages(
     const promptKey = splits[0].toLowerCase();
     userMessage.content = splits.slice(1).join(" ");
 
-    if ("fr" === promptKey) {
+    if ("fr-help" === promptKey) {
       const helperMessage = new HelperMessage();
       // @ts-ignore
       return await makeFrMsgChain(

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { WeCom_API } from "@/app/api/wecom/common";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   try {
     const params = req.nextUrl.searchParams;

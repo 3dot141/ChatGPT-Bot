@@ -43,8 +43,8 @@ export enum MessageSourceType {
 }
 
 export enum MessageSign {
-  CONTENT_SIGN = "#c1:",
-  CONTEXT_SIGN = "#c2:",
+  CONTENT_SIGN = "#c1",
+  CONTEXT_SIGN = "#c2",
 }
 
 export type CustomRequest = {

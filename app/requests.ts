@@ -7,8 +7,8 @@ export enum MessageSign {
   CONTENT_TYPE = 0,
   CONTEXT_TYPE = 1,
 
-  CONTENT_SIGN = "#c1:",
-  CONTEXT_SIGN = "#c2:",
+  CONTENT_SIGN = "#c1",
+  CONTEXT_SIGN = "#c2",
 }
 
 const TIME_OUT_MS = 30000;

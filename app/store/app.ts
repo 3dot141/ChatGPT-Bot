@@ -540,14 +540,17 @@ export const useChatStore = create<ChatStore>()(
           session.messages.push(userMessage);
         });
 
-        if (content?.startsWith("fr-goal-chain")) {
+        if (
+          content?.startsWith("fr-goal-chain ") ||
+          content?.startsWith("fr ")
+        ) {
           await this.doGoalChat(
             { title: "fr-goal-chain", query: content },
             TaskStrategy.CHAIN,
           );
           return;
         }
-        if (content?.startsWith("fr-goal-all")) {
+        if (content?.startsWith("fr-goal-all ")) {
           await this.doGoalChat(
             { title: "fr-goal-all", query: content },
             TaskStrategy.ALL,

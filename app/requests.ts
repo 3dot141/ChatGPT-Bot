@@ -256,12 +256,18 @@ export async function requestChatStream(
           const contextSignLen = MessageSign.CONTEXT_SIGN.length;
           const contextStart = contextSignLen;
           const contextEnd = text.lastIndexOf(MessageSign.CONTEXT_SIGN);
-          text = text.slice(contextStart, contextEnd);
-          options?.onContext?.(text);
+          const context = text.slice(contextStart, contextEnd);
+          if (context) {
+            console.log(context);
+          }
+          options?.onContext?.(context);
 
           // 给 message 准备的, 如果有的话。
           const contentStart = contextEnd + contextSignLen;
           text = text.slice(contentStart);
+          if (text) {
+            console.log(text);
+          }
 
           // 立刻切换成其他类型
           type = MessageSign.CONTENT_TYPE;

@@ -79,8 +79,7 @@ export class HelperMessage implements MessageMaker {
         Cite each reference using [TITLE] notation (every result has this number at the beginning). 
         Citation should be done at the end of each sentence. Only include information found in the CONTEXT and 
         don't add any additional information. Make sure the answer is correct and don't output false content. 
-        If the text does not relate to the query, 
-        just say '对不起，我不知道如何帮助你' and give me (one to three) sub-questions such that my question can be answered by the CONTEXT like '根据上下文，你也许想问'. 
+        If the text does not relate to the query, give me (one to three) sub-questions such that my question can be answered by the CONTEXT like '对不起，我不知道如何帮助你, 根据上下文，你也许想问'. 
         Only answer what is asked. The answer should be short and concise. Answer step-by-step. `;
 
     const userContent = `CONTEXT:

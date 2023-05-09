@@ -406,7 +406,7 @@ export const useChatStore = create<ChatStore>()(
             query: `fr-que ${query}`,
           },
           { title: "fr-front", query: `fr-front ${query}` },
-          { title: "gpt", query },
+          { title: "gpt", query: `please answer in chinese, ${query}` },
         ];
         for (let task of tasks) {
           const prompt = SearchService.get(task.title);

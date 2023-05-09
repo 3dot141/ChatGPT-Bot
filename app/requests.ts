@@ -247,6 +247,7 @@ export async function requestChatStream(
         }
 
         let text = decoder.decode(content.value, { stream: true });
+        text = text.trim();
 
         // 使用两个标准判断是否是 context, 从而帮助减少前端的判断请求
         if (
@@ -265,7 +266,7 @@ export async function requestChatStream(
 
           // 给 message 准备的, 如果有的话。
           // 需要把占位符给处理掉
-          const contentStart = contextEnd + contextSignLen + 1;
+          const contentStart = contextEnd + contextSignLen;
           text = text.slice(contentStart);
           if (text) {
             console.log(text);

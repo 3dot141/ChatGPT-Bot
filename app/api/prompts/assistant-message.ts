@@ -99,7 +99,7 @@ export class AssistantMessage implements MessageMaker {
   ${contextText}
   
   USER QUESTION: 
-  在FineReport中，${userMessage.content}
+  """${userMessage.content}"""
   `,
     };
     return {

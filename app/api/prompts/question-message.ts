@@ -64,21 +64,21 @@ export class QuestionMessage implements MessageMaker {
           content: content,
         });
 
-        contextText += `"""${content.trim()}"""\n`;
+        contextText += `${content.trim()}\n---\n`;
       }
     }
 
     let context: MessageContext = { sources };
 
     const systemContent = `你是一个严谨、精明、注重格式、表达详细的助手。
-  当给你"""CONTEXT"""时，你只用这些信息来回答问题。
-  你以 markdown 的形式输出。如果有代码片段，那么就输出为代码格式。
+  你只用提供的 CONTEXT 来回答问题，不要捏造事实。
+  如果你不确定回答，你就在回答开头说:"对不起，我不知道如何帮助你。"。
+  以 markdown 的形式输出。如果有代码片段，那么就输出为代码格式。
   如果有多个步骤或者需要说明多个信息，就用 1- 2- 3- 这样的形式输出。
-  如果你不确定回答，且答案没有明确写在提供的 CONTEXT 中，你就在回答开头说:"对不起，我不知道如何帮助你。" 
   `;
 
     const userContent = `CONTEXT:
-  """Next.js是一个React框架，用于创建网络应用。"""
+  Next.js是一个React框架，用于创建网络应用。
 
   QUESTION:
   what is nextjs?
@@ -98,7 +98,7 @@ export class QuestionMessage implements MessageMaker {
   ${contextText}
   
   USER QUESTION: 
-  在FineReport中，${userMessage.content}
+  """${userMessage.content}"""
   `,
     };
     return {

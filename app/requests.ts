@@ -273,6 +273,7 @@ export async function requestChatStream(
 
         const done = content.done;
         if (done) {
+          debugger;
           break;
         }
       }

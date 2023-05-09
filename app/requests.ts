@@ -258,6 +258,7 @@ export async function requestChatStream(
           const contextEnd = text.lastIndexOf(MessageSign.CONTEXT_SIGN);
           const context = text.slice(contextStart, contextEnd);
           if (context) {
+            console.log(text);
             console.log(context);
           }
           options?.onContext?.(context);

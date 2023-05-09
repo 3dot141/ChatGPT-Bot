@@ -61,7 +61,7 @@ export class AssistantMessage implements MessageMaker {
 
         sources.push({
           type: MessageSourceType.TEXT,
-          title: document.title,
+          title: `${i}-${document.title}`,
           content: content,
         });
 

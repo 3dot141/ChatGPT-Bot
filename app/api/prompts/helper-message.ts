@@ -62,7 +62,7 @@ export class HelperMessage implements MessageMaker {
         sources.push({
           type: MessageSourceType.LINK,
           link: url,
-          title: document.title,
+          title: `${i}-${document.title}`,
           content: content,
         });
 

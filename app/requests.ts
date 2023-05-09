@@ -264,7 +264,8 @@ export async function requestChatStream(
           options?.onContext?.(context);
 
           // 给 message 准备的, 如果有的话。
-          const contentStart = contextEnd + contextSignLen;
+          // 需要把占位符给处理掉
+          const contentStart = contextEnd + contextSignLen + 1;
           text = text.slice(contentStart);
           if (text) {
             console.log(text);

@@ -61,8 +61,9 @@ async function createStream(res: Response, context?: MessageContext) {
 
       if (context) {
         const contextStr = JSON.stringify(context);
+        const placeholder = "=";
         const queue = encoder.encode(
-          `${MessageSign.CONTEXT_SIGN}${contextStr}${MessageSign.CONTEXT_SIGN}`,
+          `${MessageSign.CONTEXT_SIGN}${contextStr}${MessageSign.CONTEXT_SIGN}${placeholder}`,
         );
         controller.enqueue(queue);
       }

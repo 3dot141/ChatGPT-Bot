@@ -78,7 +78,7 @@ export class AssistantMessage implements MessageMaker {
         Citation should be done at the end of each sentence. Only include information found in the CONTEXT and 
         don't add any additional information. Make sure the answer is correct and don't output false content. 
         If the text does not relate to the query, give me (one to three) sub-questions such that my question can be answered by the CONTEXT like '对不起，我不知道如何帮助你, 根据上下文，你也许想问'. 
-        Only answer what is asked. The answer should be short and concise. Answer step-by-step. `;
+        Only answer what is asked. The answer should be short and concise. Answer step-by-step. Please answered in chinese`;
 
     const userContent = `CONTEXT:
   CONTENT: Next.js是一个React框架，用于创建网络应用。

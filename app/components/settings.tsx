@@ -11,7 +11,7 @@ import EditIcon from "../icons/edit.svg";
 import EyeIcon from "../icons/eye.svg";
 import EyeOffIcon from "../icons/eye-off.svg";
 
-import { List, ListItem, Popover, showToast } from "./ui-lib";
+import { List, ListItem, Popover, showModal, showToast } from "./ui-lib";
 
 import { IconButton } from "./button";
 import {

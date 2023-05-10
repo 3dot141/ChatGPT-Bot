@@ -30,6 +30,7 @@ import {
   Theme,
   useAccessStore,
   useChatStore,
+  useUpdateStore,
 } from "../store";
 
 import {
@@ -423,6 +424,22 @@ export function Chat(props: {
   const { submitKey, shouldSubmit } = useSubmitHandler();
   const { scrollRef, setAutoScroll, scrollToBottom } = useScrollToBottom();
   const [hitBottom, setHitBottom] = useState(false);
+
+  const updateStore = useUpdateStore();
+
+  if (updateStore.needRemind()) {
+    showModal({
+      title: "Hello, 伟大的勇者",
+      children: (
+        <div>
+          {
+            "别忘了有点赞功能哦，请善用点赞功能，每一次点赞都是工具进化的源动力！"
+          }
+        </div>
+      ),
+    });
+    updateStore.updateRemindDate();
+  }
 
   const onChatBodyScroll = (e: HTMLElement) => {
     const isTouchBottom = e.scrollTop + e.clientHeight >= e.scrollHeight - 20;

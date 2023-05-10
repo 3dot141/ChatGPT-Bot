@@ -8,6 +8,10 @@ export interface UpdateStore {
 
   version: string;
   getLatestVersion: (force: boolean) => Promise<string>;
+
+  remindLastDate: string;
+  updateRemindDate: () => void;
+  needRemind: () => boolean;
 }
 
 export const UPDATE_KEY = "chat-update";
@@ -33,6 +37,26 @@ export const useUpdateStore = create<UpdateStore>()(
       remoteVersion: "",
 
       version: "unknown",
+
+      remindLastDate: "",
+
+      updateRemindDate() {
+        const dateStr = new Date().toLocaleString("zh-CN", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        });
+        set(() => ({ remindLastDate: dateStr }));
+      },
+
+      needRemind(): boolean {
+        const dateStr = new Date().toLocaleString("zh-CN", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        });
+        return dateStr !== get().remindLastDate;
+      },
 
       async getLatestVersion(force = false) {
         set(() => ({ version: queryMeta("version") }));

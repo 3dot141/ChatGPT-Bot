@@ -91,6 +91,7 @@ export async function recordLikeOrUnlike(
   type: LikeType,
 ) {
   requestAnalysisLike(messages[index - 1], messages[index], type);
+  showToast("反馈成功, 感谢您的小手，喝杯茶歇一下吧～");
 }
 
 export function downloadAs(text: string, filename: string) {

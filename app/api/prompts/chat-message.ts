@@ -5,6 +5,7 @@ import { QuestionMessage } from "@/app/api/prompts/question-message";
 import { AssistantMessage } from "@/app/api/prompts/assistant-message";
 import { ChatCustomRequest } from "@/app/api/chat-stream/route";
 import { CommonCache } from "@/app/lib/common-cache";
+import context from "react-redux/src/components/Context";
 
 export type SessionMsg = {
   userMessage: Message;
@@ -20,21 +21,40 @@ export enum QueryType {
 export type Document = { title: string; content: string; url: string };
 
 export type MessageChain = {
-  systemContent: string;
-  userContent: string;
-  assistantContent: string;
+  systemMessage: Message;
+  fewShotMessages: Message[];
   queryMessage: Message;
 
   context?: MessageContext;
 };
 
+export type DocContext = {
+  context: MessageContext;
+};
+
 export interface MessageMaker {
   queryDocuments(embedding: []): Promise<Document[]>;
 
-  parseDoc2MessageChain(
-    documents: Document[],
-    userMessage: Message,
-  ): MessageChain;
+  parseDoc2Context(documents: Document[]): DocContext;
+}
+
+export function createShotMessage(
+  name: string,
+  userContent: string,
+  assistantMessage: string,
+): Message[] {
+  return [
+    {
+      role: "user",
+      content: userContent,
+      ...{ name },
+    },
+    {
+      role: "assistant",
+      content: assistantMessage,
+      ...{ name },
+    },
+  ];
 }
 
 const embeddingCache = new CommonCache<string, any>();
@@ -67,29 +87,12 @@ async function makeFrMsgChain(
       return await messageMaker.queryDocuments(embedding);
     })) ?? [];
 
-  const {
-    systemContent,
-    userContent,
-    assistantContent,
-    queryMessage,
-    context,
-  } = messageMaker.parseDoc2MessageChain(documents, userMessage);
+  const docContext = messageMaker.parseDoc2Context(documents);
 
-  const recentMsgList: Message[] = [
-    ...recentMessages,
-    {
-      role: "system",
-      content: systemContent,
-    },
-    {
-      role: "user",
-      content: userContent,
-    },
-    {
-      role: "assistant",
-      content: assistantContent,
-    },
-  ];
+  const { systemMessage, fewShotMessages, queryMessage, context } =
+    convertDocContext2MessageChain(docContext, userMessage);
+
+  const recentMsgList: Message[] = [systemMessage, ...fewShotMessages];
 
   console.log("messages: ", queryMessage);
   return { userMessage: queryMessage, recentMessages: recentMsgList, context };
@@ -172,4 +175,61 @@ export async function preHandleMessage(
   } catch (e) {
     throw e;
   }
+}
+
+function convertDocContext2MessageChain(
+  docContext: DocContext,
+  userMessage: Message,
+): MessageChain {
+  const contextText = JSON.stringify(docContext);
+
+  const systemContent = `You are a helpful assistant. You always format your output in markdown. You include code snippets if relevant. 
+  Compose a comprehensive reply to the query using the CONTEXT given.
+  Don't use any information exclude the CONTEXT given. 
+  Cite each reference using [TITLE] notation (TITLE always be in the CONTEXT). 
+  Citation should be done at the end of each sentence. Only include information found in the CONTEXT and 
+  Don't add any additional information. Make sure the answer is correct and don't output false content. 
+  If the text does not relate to the query, only say:'对不起，我不知道如何帮助你'.
+  Only answer what is asked. The answer should be short and concise. Answer step-by-step. Please answered in chinese`;
+
+  const userContent = `{
+  "CONTEXT": [{
+  "CONTENT": "Next.js是一个React框架，用于创建网络应用。",
+  "TITLE": "next.js官网",
+  "SOURCE": "nextjs.org/docs/faq"
+  }]
+  }
+  ---
+  
+  QUESTION: 
+  what is nextjs?`;
+
+  const assistantContent = `Next.js是一个React框架，用于创建网络应用。
+  \`\`\`js
+  function HomePage() {
+    return <div>Welcome to Next.js!</div>
+  }
+  \`\`\`
+  [next.js官网]`;
+
+  const queryMessage: Message = {
+    role: "user",
+    content: `
+  ${contextText}
+  
+  QUESTION: 
+  ${userMessage.content}?  
+  `,
+  };
+  return {
+    systemMessage: {
+      role: "system",
+      content: systemContent,
+    },
+    fewShotMessages: [
+      ...createShotMessage("example_1", userContent, assistantContent),
+    ],
+    queryMessage,
+    context: docContext.context,
+  };
 }

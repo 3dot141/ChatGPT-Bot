@@ -1,4 +1,6 @@
 import {
+  createShotMessage,
+  DocContext,
   Document,
   MessageChain,
   MessageMaker,
@@ -34,10 +36,7 @@ export class HelperMessage implements MessageMaker {
     return documents;
   }
 
-  parseDoc2MessageChain(
-    documents: Document[],
-    userMessage: Message,
-  ): MessageChain {
+  parseDoc2Context(documents: Document[]): DocContext {
     const tokenizer = new GPT3Tokenizer({ type: "gpt3" });
     let tokenCount = 0;
     let contextText = "";
@@ -65,67 +64,10 @@ export class HelperMessage implements MessageMaker {
           title: `${i}-${document.title}`,
           content: content,
         });
-
-        contextText += `CONTENT: ${content.trim()}\n
-          TITLE: ${document.title} \n 
-          SOURCE: ${url}\n\n`;
       }
     }
 
     let context: MessageContext = { sources };
-
-    const systemContent = `You are a helpful assistant for FineReport. You always format your output in markdown. You include code snippets if relevant. 
-        Compose a comprehensive reply to the query using the CONTEXT given. 
-        Cite each reference using [TITLE] notation (every result has this number at the beginning). 
-        Citation should be done at the end of each sentence. Only include information found in the CONTEXT and 
-        don't add any additional information. Make sure the answer is correct and don't output false content. 
-        If the text does not relate to the query, give me (one to three) sub-questions such that my question can be answered by the CONTEXT like '对不起，我不知道如何帮助你, 根据上下文，你也许想问'. 
-        Only answer what is asked. The answer should be short and concise. Answer step-by-step. Please answered in chinese`;
-
-    const userContent = `CONTEXT:
-  CONTENT: Next.js是一个React框架，用于创建网络应用。
-  TITLE: next.js官网
-  SOURCE: nextjs.org/docs/faq
-  
-  QUESTION: 
-  what is nextjs?`;
-
-    const assistantContent = `Next.js是一个React框架，用于创建网络应用。
-  \`\`\`js
-  function HomePage() {
-    return <div>Welcome to Next.js!</div>
-  }
-  \`\`\`
-  [next.js官网]`;
-
-    const userContent_2 = `CONTEXT: 
-  CONTENT: Next.js是一个React框架，用于创建网络应用。
-  TITLE: next.js官网
-  SOURCE: nextjs.org/docs/faq
-  
-  QUESTION: 
-  what is nuxtjs?`;
-
-    const assistantContent_2 = `对不起，我不知道如何帮助你, 根据上下文，你也许想问: 
-    - what is nextjs?
-    - what difference between nuxtjs and nextjs?
-    `;
-
-    const queryMessage: Message = {
-      role: "user",
-      content: `CONTEXT:
-  ${contextText}
-  
-  QUESTION: 
-  """${userMessage.content}"""
-  `,
-    };
-    return {
-      systemContent,
-      userContent: userContent,
-      assistantContent: assistantContent,
-      queryMessage,
-      context,
-    };
+    return { context };
   }
 }

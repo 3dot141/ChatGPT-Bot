@@ -1,5 +1,8 @@
 import { NextRequest } from "next/server";
-import { ChatCompletionResponseMessage } from "openai";
+import {
+  ChatCompletionRequestMessage,
+  ChatCompletionResponseMessage,
+} from "openai";
 
 const OPENAI_URL = "api.openai.com";
 const DEFAULT_PROTOCOL = "https";
@@ -28,7 +31,7 @@ declare global {
     cot_question?: boolean;
   };
 
-  type Message = ChatCompletionResponseMessage & {
+  type Message = ChatCompletionRequestMessage & {
     date?: string;
     context?: MessageContext;
     streaming?: boolean;

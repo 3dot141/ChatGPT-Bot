@@ -406,7 +406,7 @@ export const useChatStore = create<ChatStore>()(
             query: `fr-que ${query}`,
           },
           { title: "fr-front", query: `fr-front ${query}` },
-          { title: "gpt", query: `please answer in chinese, ${query}` },
+          { title: "gpt", query: `请用中文回答， 在FineReport中, ${query}` },
         ];
         for (let task of tasks) {
           const warning =

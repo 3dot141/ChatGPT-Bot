@@ -15,7 +15,10 @@ export async function POST(req: NextRequest) {
     if (ENV !== "production") {
       return NextResponse.json(ENV);
     }
-    const userId = req.headers.get("access-code");
+    let userId = req.headers.get("username");
+    if (!userId) {
+      userId = req.headers.get("access-code");
+    }
     const analysis = (await req.json()) as Analysis;
     const result = await supabaseClient
       .from("documents_v2_analysis_like")

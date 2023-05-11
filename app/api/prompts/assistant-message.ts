@@ -72,7 +72,7 @@ export class AssistantMessage implements MessageMaker {
     }
     let context: MessageContext = { sources };
 
-    const systemContent = `You are a helpful assistant. You always format your output in markdown. You include code snippets if relevant. 
+    const systemContent = `You are a helpful assistant for FineReport. You always format your output in markdown. You include code snippets if relevant. 
         Compose a comprehensive reply to the query using the CONTEXT given. 
         Cite each reference using [TITLE] notation (every result has this number at the beginning). 
         Citation should be done at the end of each sentence. Only include information found in the CONTEXT and 

@@ -223,6 +223,7 @@ export async function requestChatStream(
     clearTimeout(reqTimeoutId);
 
     let responseText = "";
+    let responseReg = /#c2(.*?)#c2/g;
 
     const finish = () => {
       options?.onMessage(responseText, true);
@@ -247,42 +248,37 @@ export async function requestChatStream(
         }
 
         let text = decoder.decode(content.value, { stream: true });
-        text = text.trim();
+        // 默认就走这条路
+        responseText += text;
 
         // 使用两个标准判断是否是 context, 从而帮助减少前端的判断请求
         if (
           type === MessageSign.CONTEXT_TYPE &&
+          // 且需要是上下文逻辑
           text?.startsWith(MessageSign.CONTEXT_SIGN)
         ) {
-          const contextSignLen = MessageSign.CONTEXT_SIGN.length;
-          const contextStart = contextSignLen;
-          const contextEnd = text.lastIndexOf(MessageSign.CONTEXT_SIGN);
-          const context = text.slice(contextStart, contextEnd);
-          if (context) {
-            console.log(text);
-            console.log(context);
-          }
-          options?.onContext?.(context);
+          const execArray = responseReg.exec(responseText);
+          if (execArray && execArray.length == 2) {
+            const contextWrapper = execArray[0];
+            const context = execArray[1];
+            options?.onContext?.(context);
 
-          // 给 message 准备的, 如果有的话。
-          // 需要把占位符给处理掉
-          const contentStart = contextEnd + contextSignLen;
-          text = text.slice(contentStart);
-          if (text) {
-            console.log(text);
+            // 预期情况
+            // 第一种情况 "#c2aaa#c2"    -> ""
+            // 第二种情况 "#c2aaa#c2 "   -> " "
+            // 第三种情况 "#c2aaa#c2 a"  -> " a"
+            responseText = responseText.slice(contextWrapper.length);
+            responseText = responseText.trimStart();
+            // 立刻切换成其他类型
+            type = MessageSign.CONTENT_TYPE;
           }
-
-          // 立刻切换成其他类型
-          type = MessageSign.CONTENT_TYPE;
+          continue;
         }
 
-        // 默认就走这条路
-        responseText += text;
         options?.onMessage(responseText, false);
 
         const done = content.done;
         if (done) {
-          debugger;
           break;
         }
       }

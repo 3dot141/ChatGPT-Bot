@@ -59,8 +59,6 @@ export function createShotMessage(
 
 const embeddingCache = new CommonCache<string, any>();
 
-const docCache = new CommonCache<any, Document[]>();
-
 async function makeFrMsgChain(
   apiKey: string,
   userMessage: Message,
@@ -82,10 +80,7 @@ async function makeFrMsgChain(
     return embedding;
   })) as any;
 
-  let documents =
-    (await docCache.getOrLoad(embedding, async () => {
-      return await messageMaker.queryDocuments(embedding);
-    })) ?? [];
+  const documents = await messageMaker.queryDocuments(embedding);
 
   const docContext = messageMaker.parseDoc2Context(documents);
 

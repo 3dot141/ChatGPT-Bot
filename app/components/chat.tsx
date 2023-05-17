@@ -328,6 +328,41 @@ export function PromptHints(props: {
   );
 }
 
+export function Suggestions(props: {
+  suggestions: string[];
+  onSuggestionClick: (suggestion: string) => void;
+}) {
+  if (!props.suggestions || props.suggestions.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className={styles["suggestion-container"]}>
+      <div className={styles["suggestion-items"]}>
+        {
+          <button
+            className={styles["suggestion-item-main"]}
+            key={"suggestion-main"}
+          >
+            {"猜你想问"}
+          </button>
+        }
+        {props.suggestions.map((question, i) => {
+          return (
+            <button
+              className={styles["suggestion-item"] + " clickable"}
+              key={question}
+              onClick={() => props.onSuggestionClick(question)}
+            >
+              {question}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function useScrollToBottom() {
   // for auto-scroll
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -517,7 +552,9 @@ export function Chat(props: {
   const onUserSubmit = () => {
     if (userInput.length <= 0) return;
     setIsLoading(true);
-    chatStore.onUserInput(userInput).then(() => setIsLoading(false));
+    chatStore.onUserInput(userInput).then(() => {
+      setIsLoading(false);
+    });
     setBeforeInput(userInput);
     setUserInput("");
     setPromptHints([]);
@@ -862,6 +899,12 @@ export function Chat(props: {
       </div>
 
       <div className={styles["chat-input-panel"]}>
+        <Suggestions
+          suggestions={session.suggestions}
+          onSuggestionClick={(suggestion) => {
+            setUserInput(`${suggestion}`);
+          }}
+        />
         <PromptHints prompts={promptHints} onPromptSelect={onPromptSelect} />
 
         <ChatActions

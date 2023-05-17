@@ -374,6 +374,67 @@
   text-overflow: ellipsis;
 }
 
+.suggestion-container {
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 100% 8px;
+  min-height: 32px;
+  margin-bottom: 8px;
+
+  position: absolute;
+  top: -100%;
+  right: 0;
+
+  .suggestion-items {
+
+    background-color: rgba(255, 255, 255, 0);
+
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    flex-flow: wrap;
+    gap: 100% 8px;
+    order: 1;
+    padding-left: 2px;
+    overflow-y: hidden;
+    flex-wrap: wrap;
+    flex-direction: column;
+
+    .suggestion-item {
+
+      width: auto;
+      max-width: 95%;
+      font-size: 12px;
+      background-color: var(--white);
+      color: var(--black);
+      border: var(--border-in-light);
+      border-radius: 20px;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 4px 10px;
+      animation: slide-in ease 0.3s;
+      box-shadow: var(--card-shadow);
+      transition: all ease 0.3s;
+      margin-bottom: 10px;
+      align-items: flex-start;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      margin-right: 5px;
+    }
+
+    .suggestion-item-main {
+
+      @extend .suggestion-item;
+      max-width: 30%;
+      background-color: rgba(0, 0, 0, 0.05)
+    }
+  }
+}
+
 .prompt-hints {
   min-height: 20px;
   width: 100%;
@@ -408,6 +469,7 @@
 
       @include single-line();
     }
+
     .hint-content {
       font-size: 12px;
 

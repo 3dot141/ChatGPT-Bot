@@ -133,28 +133,26 @@ export async function requestUsage() {
   };
 }
 
-export async function requestChatStreamV2(
-  sessionMsg: SessionMsg,
-  options?: {
-    filterBot?: boolean;
-    modelConfig?: ModelConfig;
-    onMessage: (message: string, done: boolean) => void;
-    onError: (error: Error, statusCode?: number) => void;
-    onController?: (controller: AbortController) => void;
-  },
-) {
-  // const res = await fetch("/api/chat-message", {
-  //   method: "POST",
-  //   headers: {
-  //     "Content-Type": "application/json",
-  //     ...getHeaders(),
-  //   },
-  //   body: JSON.stringify(sessionMsg),
-  // });
-  // const resBody = (await res.json()) as SessionMsg;
-  const messages = [sessionMsg.userMessage, ...sessionMsg.recentMessages];
+export async function requestSuggestions(
+  userMessage: Message,
+): Promise<string[]> {
+  const req = makeRequestParam([userMessage], {
+    stream: false,
+  });
 
-  await requestChatStream(messages, options);
+  const res = await fetch("/api/chat-suggestion", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      path: "v1/chat/completions",
+      ...getHeaders(),
+    },
+    body: JSON.stringify(req),
+  });
+
+  const body = await res.json();
+
+  return body["questions"];
 }
 
 export async function requestAnalysis(

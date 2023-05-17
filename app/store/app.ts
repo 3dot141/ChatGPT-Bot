@@ -4,6 +4,7 @@ import {
   ControllerPool,
   requestAnalysis,
   requestChatStream,
+  requestSuggestions,
   requestWithPrompt,
 } from "../requests";
 import { isMobileScreen, trimTopic } from "../utils";
@@ -166,6 +167,7 @@ export interface ChatSession {
   memoryPrompt: string;
   context: Message[];
   messages: Message[];
+  suggestions: string[];
   stat: ChatStat;
   lastUpdate: string;
   lastSummarizeIndex: number;
@@ -187,6 +189,7 @@ function createEmptySession(): ChatSession {
     memoryPrompt: "",
     context: [],
     messages: [],
+    suggestions: [],
     stat: {
       tokenCount: 0,
       wordCount: 0,
@@ -210,6 +213,8 @@ interface ChatStore {
   currentSession: () => ChatSession;
   onNewMessage: (message: Message) => void;
   onUserInput: (content: string) => Promise<void>;
+  onUserSuggestion: (content: string) => Promise<void>;
+  clearSuggestion: () => void;
   /**
    * 创建助手的应答
    *
@@ -398,7 +403,7 @@ export const useChatStore = create<ChatStore>()(
 
       async doGoalChat(task: Task, taskStrategy: TaskStrategy) {
         // 获取纯粹的问题
-        const query = task.query.slice(task.title.length)?.trim();
+        const query = task.query;
         const tasks: Task[] = [
           { title: "fr-help", query: `fr-help ${query}` },
           {
@@ -445,6 +450,23 @@ export const useChatStore = create<ChatStore>()(
             }
           }
         }
+      },
+
+      clearSuggestion(): void {
+        get().updateCurrentSession((session) => {
+          session.suggestions = [];
+        });
+      },
+
+      async onUserSuggestion(content: string): Promise<void> {
+        requestSuggestions({
+          content: content,
+          role: "user",
+        }).then((result) => {
+          get().updateCurrentSession((session) => {
+            session.suggestions = result;
+          });
+        });
       },
 
       async onAssistantOutput(
@@ -525,6 +547,8 @@ export const useChatStore = create<ChatStore>()(
       },
 
       async onUserInput(content) {
+        get().clearSuggestion();
+
         const userMessage: Message = createMessage({
           role: "user",
           content,
@@ -538,29 +562,38 @@ export const useChatStore = create<ChatStore>()(
           session.messages.push(userMessage);
         });
 
-        if (content?.startsWith("fr-goal-chain ")) {
-          await this.doGoalChat(
-            { title: "fr-goal-chain", query: content },
-            TaskStrategy.CHAIN,
-          );
-          return;
-        }
-        if (content?.startsWith("fr ")) {
-          await this.doGoalChat(
-            { title: "fr", query: content },
-            TaskStrategy.CHAIN,
-          );
-          return;
-        }
-        if (content?.startsWith("fr-goal-all ")) {
-          await this.doGoalChat(
-            { title: "fr-goal-all", query: content },
-            TaskStrategy.ALL,
-          );
-          return;
-        }
+        const doChatStream = async () => {
+          if (content?.startsWith("fr-goal-chain ")) {
+            await get().doGoalChat(
+              { title: "fr-goal-chain", query: content },
+              TaskStrategy.CHAIN,
+            );
+            return;
+          }
+          if (content?.startsWith("fr ")) {
+            await get().doGoalChat(
+              { title: "fr", query: content },
+              TaskStrategy.CHAIN,
+            );
+            return;
+          }
+          if (content?.startsWith("fr-goal-all ")) {
+            await get().doGoalChat(
+              { title: "fr-goal-all", query: content },
+              TaskStrategy.ALL,
+            );
+            return;
+          }
 
-        get().onAssistantOutput(recentMessages, userMessage);
+          await get().onAssistantOutput(recentMessages, userMessage);
+        };
+        await doChatStream();
+
+        let pureContent = content;
+        if (content?.startsWith("fr ")) {
+          pureContent = content.slice(3).trim();
+        }
+        await get().onUserSuggestion(pureContent);
       },
 
       getMemoryPrompt() {

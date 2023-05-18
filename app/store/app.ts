@@ -562,7 +562,20 @@ export const useChatStore = create<ChatStore>()(
           session.messages.push(userMessage);
         });
 
+        if (!content?.startsWith("gpt ")) {
+          content = `fr ${content}`;
+        }
+
         const doChatStream = async () => {
+          if (content?.startsWith("gpt ")) {
+            const customUserMessage = {
+              ...userMessage,
+              content: userMessage.content.slice(4),
+            };
+            await get().onAssistantOutput(recentMessages, customUserMessage);
+            return;
+          }
+
           if (content?.startsWith("fr-goal-chain ")) {
             await get().doGoalChat(
               { title: "fr-goal-chain", query: content },

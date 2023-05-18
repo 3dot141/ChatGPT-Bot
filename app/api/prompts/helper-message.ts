@@ -13,12 +13,11 @@ import { MessageSourceType } from "@/app/api/common";
 export class HelperMessage implements MessageMaker {
   async queryDocuments(embedding: []): Promise<Document[]> {
     const { data: documents, error } = await supabaseClient.rpc(
-      "match_documents_v2_type",
+      "match_documents_v3",
       {
         query_embedding: embedding,
         similarity_threshold: 0.1, // Choose an appropriate threshold for your data
-        match_count: 5, // Choose the number of matches
-        type: QueryType.FR_HELPER,
+        match_count: 10, // Choose the number of matches
       },
     );
 

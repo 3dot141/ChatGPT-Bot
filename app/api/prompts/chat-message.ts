@@ -87,7 +87,11 @@ async function makeFrMsgChain(
   const { systemMessage, fewShotMessages, queryMessage, context } =
     convertDocContext2MessageChain(docContext, userMessage);
 
-  const recentMsgList: Message[] = [systemMessage, ...fewShotMessages];
+  const recentMsgList: Message[] = [
+    ...recentMessages,
+    systemMessage,
+    ...fewShotMessages,
+  ];
 
   console.log("messages: ", queryMessage);
   return { userMessage: queryMessage, recentMessages: recentMsgList, context };
@@ -108,7 +112,7 @@ async function makeChatMessages(
   const content = userMessage.content;
 
   const splits = content.split(" ");
-  if (splits && splits.length !== 0) {
+  if (splits && splits.length > 1) {
     const promptKey = splits[0].toLowerCase();
     userMessage.content = splits.slice(1).join(" ");
 
@@ -143,6 +147,7 @@ async function makeChatMessages(
       );
     }
   }
+  userMessage.content = content;
 
   return { userMessage: userMessage, recentMessages: recentMessages };
 }

@@ -562,7 +562,7 @@ export const useChatStore = create<ChatStore>()(
           session.messages.push(userMessage);
         });
 
-        if (!content?.startsWith("gpt ")) {
+        if (!content?.startsWith("gpt ") && !content?.startsWith("fr ")) {
           content = `fr ${content}`;
         }
 

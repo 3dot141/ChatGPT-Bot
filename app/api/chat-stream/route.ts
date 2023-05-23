@@ -59,14 +59,16 @@ async function createStream(res: Response, context?: MessageContext) {
         }
       }
 
+      let contextStr = "";
       if (context) {
-        const contextStr = JSON.stringify(context);
-        const placeholder = " ";
-        const queue = encoder.encode(
-          `${MessageSign.CONTEXT_SIGN}${contextStr}${MessageSign.CONTEXT_SIGN}${placeholder}`,
-        );
-        controller.enqueue(queue);
+        contextStr = JSON.stringify(context);
       }
+
+      const placeholder = " ";
+      const queue = encoder.encode(
+        `${MessageSign.CONTEXT_SIGN}${contextStr}${MessageSign.CONTEXT_SIGN}${placeholder}`,
+      );
+      controller.enqueue(queue);
 
       const parser = createParser(onParse);
       for await (const chunk of res.body as any) {

@@ -189,7 +189,7 @@ function convertDocContext2MessageChain(
   const systemContent = `You are a helpful assistant. You always format your output in markdown. You include code snippets if relevant. 
   Compose a comprehensive reply to the query using the CONTEXT given.
   Don't use any information exclude the CONTEXT given. 
-  Cite each reference using <em>TITLE</em> notation (TITLE always be in the CONTEXT). 
+  Cite each reference using [TITLE]() notation (TITLE always be in the CONTEXT). 
   Citation should be done at the end of each sentence. Only include information found in the CONTEXT and 
   Don't add any additional information. Make sure the answer is correct and don't output false content. 
   If the text does not relate to the query, only say:'对不起，我不知道如何帮助你'.
@@ -213,7 +213,7 @@ function convertDocContext2MessageChain(
     return <div>Welcome to Next.js!</div>
   }
   \`\`\`
-  <em>next.js官网</em>`;
+  [next.js官网]()`;
 
   const queryMessage: Message = {
     role: "user",

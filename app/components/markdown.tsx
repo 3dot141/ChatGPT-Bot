@@ -10,24 +10,12 @@ import { copyToClipboard } from "../utils";
 
 import LoadingIcon from "../icons/three-dots.svg";
 
-export function LiCode(props: { children: any }) {
-  const supIndexArray = [];
-  for (let i = 0; i < props.children.length; i++) {
-    const child = props.children[i];
-    if (child === "<em>") {
-      supIndexArray.push(i);
-    }
-  }
-  if (supIndexArray.length !== 0) {
-    for (let supIndex of supIndexArray.reverse()) {
-      const supElements = props.children.splice(supIndex, 3);
-      const supText = supElements[1].split("-")[0];
-      const supElement = <sup>{`[${supText}]`}</sup>;
-      props.children.splice(supIndex, 0, supElement);
-    }
-  }
-
-  return <li>{props.children}</li>;
+export function ACode(props: { href: any; children: any }) {
+  return (
+    <a href={props.href} className="superscript">
+      [{props.children}]
+    </a>
+  );
 }
 
 export function PreCode(props: { children: any }) {
@@ -115,6 +103,8 @@ export function Markdown(
           ]}
           components={{
             pre: PreCode,
+            // @ts-ignore
+            a: ACode,
           }}
           linkTarget={"_blank"}
         >

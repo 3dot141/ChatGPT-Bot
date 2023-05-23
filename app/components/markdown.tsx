@@ -115,7 +115,6 @@ export function Markdown(
           ]}
           components={{
             pre: PreCode,
-            li: LiCode,
           }}
           linkTarget={"_blank"}
         >

@@ -6,6 +6,7 @@ import { AssistantMessage } from "@/app/api/prompts/assistant-message";
 import { ChatCustomRequest } from "@/app/api/chat-stream/route";
 import { CommonCache } from "@/app/lib/common-cache";
 import context from "react-redux/src/components/Context";
+import { JiraMessage } from "@/app/api/prompts/jira-message";
 
 export type SessionMsg = {
   userMessage: Message;
@@ -69,6 +70,7 @@ async function makeFrMsgChain(
   // OpenAI recommends replacing newlines with spaces for best results
   userMessage.content = userMessage.content.replace(/\n/g, " ");
 
+  let start = new Date().getDate();
   const cacheKey: string = userMessage.content;
   let embedding = (await embeddingCache.getOrLoad(cacheKey, async () => {
     const embeddingResponse = await requestEmbedding(apiKey, cacheKey);
@@ -79,11 +81,13 @@ async function makeFrMsgChain(
     const [{ embedding }] = embeddingData.data;
     return embedding;
   })) as any;
+  let end = new Date().getDate();
+  console.log(`[embedding] cost ${end - start} ms`);
 
-  const start = new Date().getDate();
+  start = new Date().getDate();
   const documents = await messageMaker.queryDocuments(embedding);
-  const end = new Date().getDate();
-  console.log(`query cost ${end - start} ms`);
+  end = new Date().getDate();
+  console.log(`[query] cost ${end - start} ms`);
 
   const docContext = messageMaker.parseDoc2Context(documents);
 
@@ -129,6 +133,7 @@ async function makeChatMessages(
         helperMessage,
       );
     }
+
     if ("fr-que" === promptKey) {
       const questionMessage = new QuestionMessage();
       // @ts-ignore
@@ -139,6 +144,17 @@ async function makeChatMessages(
         questionMessage,
       );
     }
+
+    if ("fr-jira" === promptKey) {
+      const jiraMessage = new JiraMessage();
+      return await makeFrMsgChain(
+        apiKey,
+        userMessage,
+        recentMessages,
+        jiraMessage,
+      );
+    }
+
     if ("fr-front" === promptKey) {
       const assistantMessage = new AssistantMessage();
       // @ts-ignore
@@ -199,7 +215,7 @@ function convertDocContext2MessageChain(
   "CONTEXT": [{
   "CONTENT": "Next.js是一个React框架，用于创建网络应用。",
   "TITLE": "next.js官网",
-  "SOURCE": "nextjs.org/docs/faq"
+  "LINK": "nextjs.org/docs/faq"
   }]
   }
   ---
@@ -213,7 +229,7 @@ function convertDocContext2MessageChain(
     return <div>Welcome to Next.js!</div>
   }
   \`\`\`
-  [next.js官网]()`;
+  [next.js官网](nextjs.org/docs/faq)`;
 
   const queryMessage: Message = {
     role: "user",

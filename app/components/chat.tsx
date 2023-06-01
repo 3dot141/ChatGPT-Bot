@@ -466,11 +466,7 @@ export function Chat(props: {
     showModal({
       title: "Hello, 伟大的勇者",
       children: (
-        <div>
-          {
-            "别忘了有点赞功能哦，请善用点赞功能，每一次点赞都是工具进化的源动力！"
-          }
-        </div>
+        <div>{"0531：暂停问题库、jira的查询，只提供帮助文档/GPT的查询"}</div>
       ),
     });
     updateStore.updateRemindDate();

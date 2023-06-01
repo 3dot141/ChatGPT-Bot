@@ -406,10 +406,6 @@ export const useChatStore = create<ChatStore>()(
         const query = task.query;
         const tasks: Task[] = [
           { title: "fr-help", query: `fr-help ${query}` },
-          {
-            title: "fr-que",
-            query: `fr-que ${query}`,
-          },
           { title: "fr-front", query: `fr-front ${query}` },
           { title: "gpt", query: `请用中文回答， 在FineReport中, ${query}` },
         ];
@@ -606,7 +602,7 @@ export const useChatStore = create<ChatStore>()(
         if (content?.startsWith("fr ")) {
           pureContent = content.slice(3).trim();
         }
-        await get().onUserSuggestion(pureContent);
+        // await get().onUserSuggestion(pureContent);
       },
 
       getMemoryPrompt() {
